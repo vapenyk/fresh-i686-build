@@ -35,13 +35,6 @@ jobs:
     needs: check-upstream
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - arch: k8-sse3
-            cpu_flag: k8-sse3
-          - arch: pentium4
-            cpu_flag: pentium4
     steps:
       - name: Checkout Upstream Repository
         uses: actions/checkout@v4
@@ -78,24 +71,35 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: cargo-${{ runner.os }}-i686-${{ matrix.arch }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-${{ runner.os }}-i686-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            cargo-${{ runner.os }}-i686-${{ matrix.arch }}-
+            cargo-${{ runner.os }}-i686-
 
-      - name: Build Fresh IDE (${{ matrix.arch }})
+      - name: Build fresh-k8-sse3
         env:
           CARGO_PROFILE_RELEASE_LTO: "fat"
           CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "1"
-          RUSTFLAGS: "-C target-cpu=${{ matrix.cpu_flag }} -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
+          RUSTFLAGS: "-C target-cpu=k8-sse3 -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
         run: |
           cargo zigbuild --target i686-unknown-linux-musl --release
-          mv target/i686-unknown-linux-musl/release/fresh fresh-${{ matrix.arch }}
+          mv target/i686-unknown-linux-musl/release/fresh fresh-k8-sse3
 
-      - name: Upload Artifact
+      - name: Build fresh-pentium4
+        env:
+          CARGO_PROFILE_RELEASE_LTO: "fat"
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "1"
+          RUSTFLAGS: "-C target-cpu=pentium4 -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
+        run: |
+          cargo zigbuild --target i686-unknown-linux-musl --release
+          mv target/i686-unknown-linux-musl/release/fresh fresh-pentium4
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fresh-${{ matrix.arch }}
-          path: fresh-${{ matrix.arch }}
+          name: binaries
+          path: |
+            fresh-k8-sse3
+            fresh-pentium4
 
   release:
     needs: [check-upstream, build]
@@ -105,8 +109,8 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
+          name: binaries
           path: artifacts
-          merge-multiple: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
