@@ -1,0 +1,99 @@
+name: Auto-Build Fresh for i686
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    outputs:
+      upstream_tag: ${{ steps.get_tag.outputs.UPSTREAM_TAG }}
+      should_build: ${{ steps.get_tag.outputs.SHOULD_BUILD }}
+    steps:
+      - name: Get latest upstream tag
+        id: get_tag
+        run: |
+          UPSTREAM_TAG=$(curl -s https://api.github.com/repos/sinelaw/fresh/releases/latest | jq -r .tag_name)
+          OUR_LATEST_TAG=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+
+          echo "Upstream tag: $UPSTREAM_TAG"
+          echo "Our latest tag: $OUR_LATEST_TAG"
+
+          if [ -z "$UPSTREAM_TAG" ] || [ "$UPSTREAM_TAG" = "null" ]; then
+            echo "Upstream release not found."
+            echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
+          elif [ "$UPSTREAM_TAG" != "$OUR_LATEST_TAG" ]; then
+            echo "New release found! Proceeding with build."
+            echo "UPSTREAM_TAG=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
+            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
+          else
+            echo "Already up to date."
+            echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
+          fi
+  build:
+    needs: check-upstream
+    if: needs.check-upstream.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: k8-sse3
+            cpu_flag: k8-sse3
+          - arch: pentium4
+            cpu_flag: pentium4
+    steps:
+      - name: Checkout Upstream Repository
+        uses: actions/checkout@v4
+        with:
+          repository: sinelaw/fresh
+          ref: ${{ needs.check-upstream.outputs.upstream_tag }}
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: i686-unknown-linux-musl
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: master
+      - name: Install cargo-zigbuild
+        run: cargo install cargo-zigbuild
+      - name: Build Fresh IDE (${{ matrix.arch }})
+        env:
+          CARGO_PROFILE_RELEASE_LTO: "fat"
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "1"
+          RUSTFLAGS: "-C target-cpu=${{ matrix.cpu_flag }} -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
+        run: |
+          cargo zigbuild --target i686-unknown-linux-musl --release
+          mv target/i686-unknown-linux-musl/release/fresh fresh-${{ matrix.arch }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fresh-${{ matrix.arch }}
+          path: fresh-${{ matrix.arch }}
+  release:
+    needs: [check-upstream, build]
+    if: needs.check-upstream.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.check-upstream.outputs.upstream_tag }}
+          name: Fresh IDE ${{ needs.check-upstream.outputs.upstream_tag }} (i686 Optimized)
+          body: |
+            Automated build of Fresh IDE for older 32-bit processors (i686).
+
+            - **fresh-k8-sse3**: Optimized for AMD K8 / Sempron with SSE3 support.
+            - **fresh-pentium4**: Compatible with any CPU supporting SSE2 (Pentium 4 and up).
+
+            Statically compiled via `musl` + `zig` with fat LTO.
+          files: |
+            artifacts/fresh-k8-sse3
+            artifacts/fresh-pentium4
