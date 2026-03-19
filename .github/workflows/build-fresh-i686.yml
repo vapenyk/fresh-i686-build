@@ -17,10 +17,8 @@ jobs:
         run: |
           UPSTREAM_TAG=$(curl -s https://api.github.com/repos/sinelaw/fresh/releases/latest | jq -r .tag_name)
           OUR_LATEST_TAG=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
-
           echo "Upstream tag: $UPSTREAM_TAG"
           echo "Our latest tag: $OUR_LATEST_TAG"
-
           if [ -z "$UPSTREAM_TAG" ] || [ "$UPSTREAM_TAG" = "null" ]; then
             echo "Upstream release not found."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
@@ -32,6 +30,7 @@ jobs:
             echo "Already up to date."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
           fi
+
   build:
     needs: check-upstream
     if: needs.check-upstream.outputs.should_build == 'true'
@@ -49,16 +48,39 @@ jobs:
         with:
           repository: sinelaw/fresh
           ref: ${{ needs.check-upstream.outputs.upstream_tag }}
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: i686-unknown-linux-musl
+
       - name: Install Zig
         uses: mlugg/setup-zig@v1
         with:
-          version: master
+          version: 0.13.0
+
+      - name: Cache cargo-zigbuild
+        id: cache-zigbuild
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-zigbuild
+          key: cargo-zigbuild-${{ runner.os }}
+
       - name: Install cargo-zigbuild
+        if: steps.cache-zigbuild.outputs.cache-hit != 'true'
         run: cargo install cargo-zigbuild
+
+      - name: Cache cargo registry & build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-i686-${{ matrix.arch }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-i686-${{ matrix.arch }}-
+
       - name: Build Fresh IDE (${{ matrix.arch }})
         env:
           CARGO_PROFILE_RELEASE_LTO: "fat"
@@ -67,11 +89,13 @@ jobs:
         run: |
           cargo zigbuild --target i686-unknown-linux-musl --release
           mv target/i686-unknown-linux-musl/release/fresh fresh-${{ matrix.arch }}
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: fresh-${{ matrix.arch }}
           path: fresh-${{ matrix.arch }}
+
   release:
     needs: [check-upstream, build]
     if: needs.check-upstream.outputs.should_build == 'true'
@@ -82,6 +106,7 @@ jobs:
         with:
           path: artifacts
           merge-multiple: true
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -89,10 +114,8 @@ jobs:
           name: Fresh IDE ${{ needs.check-upstream.outputs.upstream_tag }} (i686 Optimized)
           body: |
             Automated build of Fresh IDE for older 32-bit processors (i686).
-
             - **fresh-k8-sse3**: Optimized for AMD K8 / Sempron with SSE3 support.
             - **fresh-pentium4**: Compatible with any CPU supporting SSE2 (Pentium 4 and up).
-
             Statically compiled via `musl` + `zig` with fat LTO.
           files: |
             artifacts/fresh-k8-sse3
