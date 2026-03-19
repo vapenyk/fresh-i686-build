@@ -1,0 +1,75 @@
+{
+  "version": 1,
+
+  "editor": {
+    "tab_size": 4,
+    "line_numbers": true,
+    "line_wrap": false,
+    "rulers": [],
+
+    "highlight_matching_brackets": true,
+    "whitespace_indicators": false,
+    "diagnostics_inline_text": true,
+
+    "vertical_scrollbar": true,
+    "horizontal_scrollbar": false,
+
+    "auto_close": true,
+    "auto_surround": true,
+    "trim_trailing_whitespace_on_save": false,
+    "ensure_final_newline_on_save": false,
+
+    "auto_save_enabled": false,
+    "auto_save_interval": 60,
+    "recovery_save_interval": 30
+  },
+
+  "terminal": {
+    "jump_to_end_on_output": false
+  },
+
+  "lsp": {
+    "rust": {
+      "enabled": true,
+      "process_limits": {
+        "max_memory_mb": 512,
+        "max_cpu_percent": 50
+      }
+    },
+    "go": {
+      "enabled": true,
+      "process_limits": {
+        "max_memory_mb": 256,
+        "max_cpu_percent": 50
+      }
+    },
+    "javascript": {
+      "enabled": true,
+      "process_limits": {
+        "max_memory_mb": 256,
+        "max_cpu_percent": 50
+      }
+    },
+    "typescript": {
+      "enabled": false
+    },
+    "markdown": {
+      "command": "marksman",
+      "args": ["server"],
+      "enabled": true,
+      "process_limits": {
+        "max_memory_mb": 128,
+        "max_cpu_percent": 25
+      }
+    },
+    "php": {
+      "command": "intelephense",
+      "args": ["--stdio"],
+      "enabled": true,
+      "process_limits": {
+        "max_memory_mb": 256,
+        "max_cpu_percent": 50
+      }
+    }
+  }
+}
