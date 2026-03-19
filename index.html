@@ -2,86 +2,72 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>fresh-editor :: i686 builds</title>
         <style type="text/css">
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
             body {
                 background-color: #000080;
                 color: #aaaaaa;
                 font-family: "Courier New", Courier, monospace;
                 font-size: 14px;
+                margin: 0;
+                padding: 0;
             }
 
-            #screen {
-                width: 96%;
-                max-width: 860px;
-                margin: 18px auto 32px auto;
+            #wrap {
+                width: 800px;
+                margin: 16px auto 32px auto;
             }
 
             /* ── TITLE BAR ── */
-            #titlebar {
+            table.titlebar {
+                width: 100%;
                 background-color: #aaaaaa;
-                color: #000000;
-                padding: 3px 6px;
                 border: 2px solid #ffffff;
-                border-bottom: none;
-                overflow: hidden;
             }
-            .tb-title {
+            td.tb-title {
+                color: #000000;
                 font-weight: bold;
-                display: block;
-                margin-bottom: 2px;
+                padding: 3px 6px;
+                width: 60%;
             }
-            .tb-links {
-                display: block;
+            td.tb-links {
+                text-align: right;
+                padding: 3px 6px;
             }
-            .tb-btn {
-                background: #000080;
+            a.tb-btn {
+                background-color: #000080;
                 color: #ffffff;
                 border: 1px solid #000000;
                 padding: 1px 6px;
-                margin-right: 4px;
+                margin-left: 4px;
                 font-size: 12px;
                 font-family: "Courier New", Courier, monospace;
                 text-decoration: none;
-                display: inline-block;
-            }
-            .tb-btn:hover {
-                background: #aaaaaa;
-                color: #000000;
             }
 
             /* ── MENU BAR ── */
-            #menubar {
+            table.menubar {
+                width: 100%;
                 background-color: #aaaaaa;
-                color: #000000;
-                padding: 3px 6px;
                 border-left: 2px solid #ffffff;
                 border-right: 2px solid #ffffff;
                 border-bottom: 1px solid #555555;
             }
-            .menu-item {
-                display: inline-block;
-                padding: 0 10px 0 0;
+            td.menubar-cell {
+                padding: 3px 6px;
+            }
+            a.menu-item {
                 color: #000000;
                 text-decoration: none;
+                padding-right: 12px;
                 font-size: 14px;
+                font-family: "Courier New", Courier, monospace;
             }
-            .menu-item:hover {
-                color: #000080;
-                text-decoration: underline;
-            }
-            .menu-hot {
+            span.menu-hot {
                 text-decoration: underline;
             }
 
-            /* ── MAIN ── */
+            /* ── MAIN AREA ── */
             #mainwin {
                 background-color: #000080;
                 border-left: 2px solid #ffffff;
@@ -89,12 +75,13 @@
                 padding: 10px;
             }
 
-            /* ── HERO PANEL ── */
-            .hero {
+            /* ── SECTION PANELS ── */
+            table.panel {
+                width: 100%;
                 border: 2px solid #55ffff;
-                margin-bottom: 12px;
+                margin-bottom: 14px;
             }
-            .hero-title {
+            td.panel-title {
                 background-color: #000080;
                 color: #ffff55;
                 font-weight: bold;
@@ -103,591 +90,653 @@
                 border-bottom: 1px solid #55ffff;
                 letter-spacing: 1px;
             }
-            .hero-body {
-                padding: 8px 12px;
-                line-height: 1.6;
-            }
-
-            /* ── TABS (CSS :target trick) ── */
-            .tab-nav {
-                margin-bottom: 0;
-                line-height: 1;
-            }
-            .tab-nav a {
-                display: inline-block;
-                background-color: #005555;
-                color: #aaaaaa;
-                padding: 3px 14px;
-                border: 1px solid #55ffff;
-                border-bottom: none;
-                font-size: 13px;
-                text-decoration: none;
-                margin-right: 2px;
-            }
-            .tab-nav a:hover {
-                background-color: #007777;
-                color: #ffffff;
-            }
-
-            /* default: show first tab */
-            #pane-install {
-                display: block;
-            }
-            #pane-builds {
-                display: none;
-            }
-            #pane-config {
-                display: none;
-            }
-            #pane-update {
-                display: none;
-            }
-
-            /* when anchor is targeted, show that pane, hide others */
-            #pane-install:target {
-                display: block;
-            }
-            #pane-builds:target {
-                display: block;
-            }
-            #pane-config:target {
-                display: block;
-            }
-            #pane-update:target {
-                display: block;
-            }
-
-            body:not(:has(#pane-builds:target)):not(
-                    :has(#pane-config:target)
-                ):not(:has(#pane-update:target))
-                #pane-install {
-                display: block;
-            }
-            #pane-builds:target ~ * #pane-install,
-            #pane-config:target ~ * #pane-install,
-            #pane-update:target ~ * #pane-install {
-                display: none;
-            }
-
-            .tab-pane {
-                border: 2px solid #55ffff;
-                border-top: 2px solid #ffff55;
+            td.panel-body {
                 padding: 10px 12px;
-                margin-bottom: 12px;
             }
 
-            /* ── TYPOGRAPHY ── */
+            /* ── HEADINGS ── */
             h2 {
                 color: #55ffff;
                 font-size: 14px;
                 font-weight: bold;
                 margin: 14px 0 6px 0;
                 letter-spacing: 1px;
-            }
-            h2:first-child {
-                margin-top: 0;
+                padding: 0;
             }
             h3 {
                 color: #ffff55;
                 font-size: 13px;
                 font-weight: bold;
                 margin: 10px 0 4px 0;
+                padding: 0;
             }
             p {
-                margin: 4px 0 8px 0;
                 color: #aaaaaa;
+                margin: 4px 0 8px 0;
                 line-height: 1.6;
+                padding: 0;
             }
             a {
                 color: #55ffff;
                 text-decoration: none;
             }
-            a:hover {
-                color: #ffff55;
-                text-decoration: underline;
-            }
 
-            code,
+            /* ── CODE ── */
             pre {
                 font-family: "Courier New", Courier, monospace;
                 color: #55ff55;
                 background-color: #000040;
                 font-size: 13px;
-            }
-            pre {
                 padding: 6px 10px;
                 margin: 6px 0 10px 0;
                 border: 1px solid #005500;
-                overflow: auto;
-                white-space: pre;
-                word-wrap: normal;
             }
             code {
+                font-family: "Courier New", Courier, monospace;
+                color: #55ff55;
+                background-color: #000040;
+                font-size: 13px;
                 padding: 0 3px;
             }
 
-            /* ── TABLES ── */
-            .data-table {
+            /* ── INSTALL BOX ── */
+            table.install-box {
+                width: 100%;
+                background-color: #002200;
+                border: 2px solid #55ff55;
+                margin: 10px 0;
+            }
+            td.install-box-cell {
+                padding: 8px 12px;
+            }
+            p.install-label {
+                color: #55ff55;
+                font-weight: bold;
+                font-size: 12px;
+                letter-spacing: 1px;
+                margin: 0 0 4px 0;
+            }
+
+            /* ── DATA TABLES ── */
+            table.data {
                 width: 100%;
                 border-collapse: collapse;
                 margin: 6px 0 12px 0;
                 font-size: 13px;
             }
-            .data-table th {
+            th.data {
                 background-color: #000040;
                 color: #55ffff;
                 padding: 4px 8px;
                 border: 1px solid #005555;
                 text-align: left;
                 font-weight: bold;
+                font-family: "Courier New", Courier, monospace;
             }
-            .data-table td {
+            td.data {
                 padding: 4px 8px;
                 border: 1px solid #003355;
                 color: #aaaaaa;
                 vertical-align: top;
-            }
-            .data-table tr:hover td {
-                background-color: #000060;
-            }
-
-            /* ── INSTALL BOX ── */
-            .install-box {
-                border: 2px solid #55ff55;
-                background-color: #002200;
-                padding: 10px 14px;
-                margin: 10px 0;
-            }
-            .install-label {
-                color: #55ff55;
-                font-weight: bold;
-                font-size: 12px;
-                letter-spacing: 1px;
-                margin-bottom: 6px;
-                display: block;
+                font-family: "Courier New", Courier, monospace;
             }
 
             /* ── BADGES ── */
-            .badge-warn {
-                color: #ffff55;
-                font-weight: bold;
-            }
-            .badge-ok {
+            span.ok {
                 color: #55ff55;
                 font-weight: bold;
             }
-            .badge-off {
+            span.warn {
+                color: #ffff55;
+                font-weight: bold;
+            }
+            span.off {
                 color: #555555;
             }
 
+            /* ── DIVIDER ── */
+            hr.section {
+                border: none;
+                border-top: 1px solid #005555;
+                margin: 6px 0;
+            }
+
             /* ── STATUS BAR ── */
-            #statusbar {
+            table.statusbar {
+                width: 100%;
                 background-color: #aaaaaa;
-                color: #000000;
-                padding: 3px 6px;
                 border: 2px solid #ffffff;
                 border-top: 1px solid #555555;
-                font-size: 12px;
-                overflow: hidden;
             }
-            .sb-key {
+            td.statusbar-cell {
+                padding: 3px 6px;
+                color: #000000;
+                font-size: 12px;
+            }
+            td.statusbar-right {
+                padding: 3px 6px;
+                color: #555555;
+                font-size: 11px;
+                text-align: right;
+            }
+            span.sb-key {
                 background-color: #000080;
                 color: #aaaaaa;
                 padding: 0 4px;
                 margin-right: 1px;
                 font-weight: bold;
             }
-            .sb-label {
+            span.sb-label {
                 color: #000000;
                 margin-right: 10px;
-            }
-            .sb-right {
-                float: right;
-                color: #555555;
-                font-size: 11px;
             }
         </style>
     </head>
     <body>
-        <div id="screen">
-            <div id="titlebar">
-                <span class="tb-title"
-                    >&#9632; fresh-editor &#8212; i686 optimized builds</span
-                >
-                <span class="tb-links">
-                    <a
-                        href="https://github.com/vapenyk/fresh-i686-build"
-                        class="tb-btn"
-                        target="_blank"
-                        >[ src ]</a
-                    >
-                    <a
-                        href="https://github.com/vapenyk/fresh-i686-build/releases/latest"
-                        class="tb-btn"
-                        target="_blank"
-                        >[ latest release ]</a
-                    >
-                </span>
-            </div>
+        <div id="wrap">
+            <!-- TITLE BAR -->
+            <table class="titlebar" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="tb-title">
+                        &#9632; fresh-editor &mdash; i686 optimized builds
+                    </td>
+                    <td class="tb-links">
+                        <a
+                            href="https://github.com/vapenyk/fresh-i686-build"
+                            class="tb-btn"
+                            >[ source ]</a
+                        >
+                        <a
+                            href="https://github.com/vapenyk/fresh-i686-build/releases/latest"
+                            class="tb-btn"
+                            >[ latest release ]</a
+                        >
+                    </td>
+                </tr>
+            </table>
 
-            <div id="menubar">
-                <a href="#pane-install" class="menu-item"
-                    ><span class="menu-hot">I</span>nstall</a
-                >
-                <a href="#pane-config" class="menu-item"
-                    ><span class="menu-hot">C</span>onfig</a
-                >
-                <a href="#pane-builds" class="menu-item"
-                    ><span class="menu-hot">B</span>uilds</a
-                >
-                <a href="#pane-update" class="menu-item"
-                    ><span class="menu-hot">U</span>pdate</a
-                >
-                <a
-                    href="https://github.com/sinelaw/fresh"
-                    class="menu-item"
-                    target="_blank"
-                    ><span class="menu-hot">S</span>ource</a
-                >
-            </div>
+            <!-- MENU BAR -->
+            <table class="menubar" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="menubar-cell">
+                        <a href="#install" class="menu-item"
+                            ><span class="menu-hot">I</span>nstall</a
+                        >
+                        <a href="#builds" class="menu-item"
+                            ><span class="menu-hot">B</span>uilds</a
+                        >
+                        <a href="#config" class="menu-item"
+                            ><span class="menu-hot">C</span>onfig</a
+                        >
+                        <a href="#update" class="menu-item"
+                            ><span class="menu-hot">U</span>pdate</a
+                        >
+                        <a
+                            href="https://github.com/sinelaw/fresh"
+                            class="menu-item"
+                            ><span class="menu-hot">S</span>ource</a
+                        >
+                    </td>
+                </tr>
+            </table>
 
+            <!-- MAIN -->
             <div id="mainwin">
-                <div class="hero">
-                    <div class="hero-title">
-                        &#9556;&#9552;&#9552; FRESH EDITOR :: i686 BUILDS
-                        &#9552;&#9552;&#9559;
-                    </div>
-                    <div class="hero-body">
-                        <p>
-                            Automated builds of
-                            <a
-                                href="https://github.com/sinelaw/fresh"
-                                target="_blank"
-                                >Fresh IDE</a
-                            >
-                            for older 32-bit x86 processors. Fresh does not
-                            publish pre-built Linux binaries and its toolchain
-                            assumes a modern x86-64 host. Statically linked via
-                            <span class="badge-ok">musl</span> +
-                            <span class="badge-ok">zig</span>, no external
-                            dependencies. Built nightly, released automatically.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="tab-nav">
-                    <a href="#pane-install">Install</a>
-                    <a href="#pane-builds">Builds</a>
-                    <a href="#pane-config">Config</a>
-                    <a href="#pane-update">Update &amp; Remove</a>
-                </div>
+                <!-- HERO -->
+                <table class="panel" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="panel-title">
+                            &#9556;&#9552;&#9552; FRESH EDITOR :: i686 BUILDS
+                            &#9552;&#9552;&#9559;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="panel-body">
+                            <p>
+                                Automated builds of
+                                <a href="https://github.com/sinelaw/fresh"
+                                    >Fresh IDE</a
+                                >
+                                for older 32-bit x86 processors. Fresh does not
+                                publish pre-built Linux binaries and its
+                                toolchain assumes a modern x86-64 host.
+                                Statically linked via
+                                <span class="ok">musl</span> +
+                                <span class="ok">zig</span>, no external
+                                dependencies. Built nightly, released
+                                automatically.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
 
                 <!-- INSTALL -->
-                <div id="pane-install" class="tab-pane">
-                    <h2>&#9658; Quick Install</h2>
-                    <p>
-                        Download the installer and run it. CPU variant is
-                        detected automatically.
-                    </p>
-                    <div class="install-box">
-                        <span class="install-label">$ one-liner</span>
-                        <pre>
+                <a name="install"></a>
+                <table class="panel" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="panel-title">INSTALL</td>
+                    </tr>
+                    <tr>
+                        <td class="panel-body">
+                            <h2>&#9658; Quick Install</h2>
+                            <p>
+                                Download the installer and run it. CPU variant
+                                is detected automatically.
+                            </p>
+
+                            <table
+                                class="install-box"
+                                cellpadding="0"
+                                cellspacing="0"
+                            >
+                                <tr>
+                                    <td class="install-box-cell">
+                                        <p class="install-label">$ one-liner</p>
+                                        <pre>
 curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh \
   -o /tmp/fi &amp;&amp; sh /tmp/fi install</pre
-                        >
-                    </div>
+                                        >
+                                    </td>
+                                </tr>
+                            </table>
 
-                    <h3>What the installer does</h3>
-                    <p>
-                        1. Reads <code>/proc/cpuinfo</code> and suggests the
-                        right binary for your CPU.
-                    </p>
-                    <p>
-                        2. Asks where to install (default:
-                        <code>~/.local/bin</code>).
-                    </p>
-                    <p>
-                        3. Downloads the binary, makes it executable, renames it
-                        to <code>fresh</code>.
-                    </p>
-                    <p>
-                        4. Downloads <code>config.json</code> to
-                        <code>~/.config/fresh/config.json</code>.
-                    </p>
-                    <p>
-                        5. If the install dir is not in <code>$PATH</code>,
-                        shows you the line to add.
-                    </p>
+                            <h3>What the installer does</h3>
+                            <p>
+                                1. Reads <code>/proc/cpuinfo</code> and suggests
+                                the right binary for your CPU.
+                            </p>
+                            <p>
+                                2. Asks where to install (default:
+                                <code>~/.local/bin</code>).
+                            </p>
+                            <p>
+                                3. Downloads the binary, makes it executable,
+                                renames it to <code>fresh</code>.
+                            </p>
+                            <p>
+                                4. Downloads <code>config.json</code> to
+                                <code>~/.config/fresh/config.json</code>.
+                            </p>
+                            <p>
+                                5. If the install dir is not in
+                                <code>$PATH</code>, shows you the line to add.
+                            </p>
 
-                    <h3>Commands</h3>
-                    <table class="data-table">
-                        <tr>
-                            <th>Command</th>
-                            <th>Description</th>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-install.sh install</code></td>
-                            <td>Detect CPU, download binary + config</td>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-install.sh update</code></td>
-                            <td>Update binary and/or config to latest</td>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-install.sh remove</code></td>
-                            <td>Remove binary, config, and metadata</td>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-install.sh status</code></td>
-                            <td>Version, variant, config path, PATH check</td>
-                        </tr>
-                    </table>
+                            <h3>Commands</h3>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">Command</th>
+                                    <th class="data">Description</th>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-install.sh install</code>
+                                    </td>
+                                    <td class="data">
+                                        Detect CPU, download binary + config
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-install.sh update</code>
+                                    </td>
+                                    <td class="data">
+                                        Update binary and/or config to latest
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-install.sh remove</code>
+                                    </td>
+                                    <td class="data">
+                                        Remove binary, config, and metadata
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-install.sh status</code>
+                                    </td>
+                                    <td class="data">
+                                        Version, variant, config path, PATH
+                                        check
+                                    </td>
+                                </tr>
+                            </table>
 
-                    <h3>Detect your variant manually</h3>
-                    <pre>grep -ow 'pni' /proc/cpuinfo | head -1</pre>
-                    <p>
-                        Prints <code>pni</code> &#8594; use
-                        <span class="badge-ok">k8-sse3</span>. Nothing &#8594;
-                        use <span class="badge-warn">pentium4</span>.
-                    </p>
-                </div>
+                            <h3>Detect your variant manually</h3>
+                            <pre>grep -ow 'pni' /proc/cpuinfo | head -1</pre>
+                            <p>
+                                Prints <code>pni</code> &rarr; use
+                                <span class="ok">k8-sse3</span>. Nothing &rarr;
+                                use <span class="warn">pentium4</span>.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
 
                 <!-- BUILDS -->
-                <div id="pane-builds" class="tab-pane">
-                    <h2>&#9658; Available Binaries</h2>
-                    <table class="data-table">
-                        <tr>
-                            <th>File</th>
-                            <th>Target</th>
-                            <th>Requires</th>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-k8-sse3</code></td>
-                            <td>AMD K8 / Sempron (Socket 754/939)</td>
-                            <td>SSE3 (<code>pni</code> in cpuinfo)</td>
-                        </tr>
-                        <tr>
-                            <td><code>fresh-pentium4</code></td>
-                            <td>Pentium 4 and compatible</td>
-                            <td>SSE2 only</td>
-                        </tr>
-                    </table>
+                <a name="builds"></a>
+                <table class="panel" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="panel-title">BUILDS</td>
+                    </tr>
+                    <tr>
+                        <td class="panel-body">
+                            <h2>&#9658; Available Binaries</h2>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">File</th>
+                                    <th class="data">Target</th>
+                                    <th class="data">Requires</th>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-k8-sse3</code>
+                                    </td>
+                                    <td class="data">
+                                        AMD K8 / Sempron (Socket 754/939)
+                                    </td>
+                                    <td class="data">
+                                        SSE3 (<code>pni</code> in cpuinfo)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>fresh-pentium4</code>
+                                    </td>
+                                    <td class="data">
+                                        Pentium 4 and compatible
+                                    </td>
+                                    <td class="data">SSE2 only</td>
+                                </tr>
+                            </table>
 
-                    <h3>Build flags</h3>
-                    <table class="data-table">
-                        <tr>
-                            <th>Flag</th>
-                            <th>Value</th>
-                            <th>Why</th>
-                        </tr>
-                        <tr>
-                            <td><code>LTO</code></td>
-                            <td>fat</td>
-                            <td>
-                                Full link-time optimization across all crates
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>codegen-units</code></td>
-                            <td>1</td>
-                            <td>Single unit for maximum inlining</td>
-                        </tr>
-                        <tr>
-                            <td><code>panic</code></td>
-                            <td>abort</td>
-                            <td>No unwinding code, smaller binary</td>
-                        </tr>
-                        <tr>
-                            <td><code>embed-bitcode</code></td>
-                            <td>yes</td>
-                            <td>Required for fat LTO</td>
-                        </tr>
-                        <tr>
-                            <td><code>align-all-functions</code></td>
-                            <td>4 (16 bytes)</td>
-                            <td>Instruction fetch alignment for old CPUs</td>
-                        </tr>
-                        <tr>
-                            <td><code>-s</code></td>
-                            <td>strip</td>
-                            <td>Strip debug symbols</td>
-                        </tr>
-                        <tr>
-                            <td>linker</td>
-                            <td>musl + zig</td>
-                            <td>Fully static, no libc dependency</td>
-                        </tr>
-                    </table>
+                            <h3>Build flags</h3>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">Flag</th>
+                                    <th class="data">Value</th>
+                                    <th class="data">Why</th>
+                                </tr>
+                                <tr>
+                                    <td class="data"><code>LTO</code></td>
+                                    <td class="data">fat</td>
+                                    <td class="data">
+                                        Full link-time optimization across all
+                                        crates
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>codegen-units</code>
+                                    </td>
+                                    <td class="data">1</td>
+                                    <td class="data">
+                                        Single unit for maximum inlining
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data"><code>panic</code></td>
+                                    <td class="data">abort</td>
+                                    <td class="data">
+                                        No unwinding code, smaller binary
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>embed-bitcode</code>
+                                    </td>
+                                    <td class="data">yes</td>
+                                    <td class="data">Required for fat LTO</td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>align-all-functions</code>
+                                    </td>
+                                    <td class="data">4 (16 bytes)</td>
+                                    <td class="data">
+                                        Instruction fetch alignment for old CPUs
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data"><code>-s</code></td>
+                                    <td class="data">strip</td>
+                                    <td class="data">Strip debug symbols</td>
+                                </tr>
+                                <tr>
+                                    <td class="data">linker</td>
+                                    <td class="data">musl + zig</td>
+                                    <td class="data">
+                                        Fully static, no libc dependency
+                                    </td>
+                                </tr>
+                            </table>
 
-                    <h3>LSP server install commands</h3>
-                    <table class="data-table">
-                        <tr>
-                            <th>Language</th>
-                            <th>Server</th>
-                            <th>Install</th>
-                        </tr>
-                        <tr>
-                            <td>Rust</td>
-                            <td>rust-analyzer</td>
-                            <td>
-                                <code>rustup component add rust-analyzer</code>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Go</td>
-                            <td>gopls</td>
-                            <td>
-                                <code
-                                    >go install
-                                    golang.org/x/tools/gopls@latest</code
-                                >
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>JS/TS</td>
-                            <td>typescript-language-server</td>
-                            <td>
-                                <code
-                                    >npm install -g typescript-language-server
-                                    typescript</code
-                                >
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PHP</td>
-                            <td>intelephense</td>
-                            <td><code>npm install -g intelephense</code></td>
-                        </tr>
-                        <tr>
-                            <td>Markdown</td>
-                            <td>marksman</td>
-                            <td>
-                                <a
-                                    href="https://github.com/artempyanykh/marksman/releases"
-                                    target="_blank"
-                                    >marksman releases</a
-                                >
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Python</td>
-                            <td>pylsp</td>
-                            <td><code>pip install python-lsp-server</code></td>
-                        </tr>
-                        <tr>
-                            <td>C/C++</td>
-                            <td>clangd</td>
-                            <td><code>apt install clangd</code></td>
-                        </tr>
-                    </table>
-                </div>
+                            <h3>LSP server install commands</h3>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">Language</th>
+                                    <th class="data">Server</th>
+                                    <th class="data">Install</th>
+                                </tr>
+                                <tr>
+                                    <td class="data">Rust</td>
+                                    <td class="data">rust-analyzer</td>
+                                    <td class="data">
+                                        <code
+                                            >rustup component add
+                                            rust-analyzer</code
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">Go</td>
+                                    <td class="data">gopls</td>
+                                    <td class="data">
+                                        <code
+                                            >go install
+                                            golang.org/x/tools/gopls@latest</code
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">JS/TS</td>
+                                    <td class="data">
+                                        typescript-language-server
+                                    </td>
+                                    <td class="data">
+                                        <code
+                                            >npm install -g
+                                            typescript-language-server
+                                            typescript</code
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">PHP</td>
+                                    <td class="data">intelephense</td>
+                                    <td class="data">
+                                        <code>npm install -g intelephense</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">Markdown</td>
+                                    <td class="data">marksman</td>
+                                    <td class="data">
+                                        <a
+                                            href="https://github.com/artempyanykh/marksman/releases"
+                                            >marksman releases</a
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">Python</td>
+                                    <td class="data">pylsp</td>
+                                    <td class="data">
+                                        <code
+                                            >pip install python-lsp-server</code
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">C/C++</td>
+                                    <td class="data">clangd</td>
+                                    <td class="data">
+                                        <code>apt install clangd</code>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
 
                 <!-- CONFIG -->
-                <div id="pane-config" class="tab-pane">
-                    <h2>&#9658; Low-End Config</h2>
-                    <p>
-                        Installed to <code>~/.config/fresh/config.json</code>.
-                        The goal is not to strip functionality but to
-                        <span class="badge-warn">prevent resource runaway</span>
-                        on machines with limited RAM. All visual features are
-                        kept at defaults.
-                    </p>
-
-                    <h3>What is changed and why</h3>
-                    <table class="data-table">
-                        <tr>
-                            <th>Setting</th>
-                            <th>Value</th>
-                            <th>Why</th>
-                        </tr>
-                        <tr>
-                            <td><code>recovery_save_interval</code></td>
-                            <td>30s</td>
-                            <td>
-                                Constant disk I/O every 2s is noticeable on slow
-                                HDDs
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>auto_save_enabled</code></td>
-                            <td>false</td>
-                            <td>Recovery saves still protect your work</td>
-                        </tr>
-                        <tr>
-                            <td><code>terminal.jump_to_end_on_output</code></td>
-                            <td>false</td>
-                            <td>Prevents forced redraws while scrolling</td>
-                        </tr>
-                        <tr>
-                            <td><code>horizontal_scrollbar</code></td>
-                            <td>false</td>
-                            <td>Fewer UI elements to render</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="badge-warn"
-                                    >LSP process_limits</span
+                <a name="config"></a>
+                <table class="panel" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="panel-title">CONFIG</td>
+                    </tr>
+                    <tr>
+                        <td class="panel-body">
+                            <h2>&#9658; Low-End Config</h2>
+                            <p>
+                                Installed to
+                                <code>~/.config/fresh/config.json</code>. The
+                                goal is not to strip functionality but to
+                                <span class="warn"
+                                    >prevent resource runaway</span
                                 >
-                            </td>
-                            <td>per server</td>
-                            <td>
-                                rust-analyzer alone can use 500MB+ without
-                                limits
-                            </td>
-                        </tr>
-                    </table>
+                                on machines with limited RAM. All visual
+                                features are kept at defaults.
+                            </p>
 
-                    <h3>LSP memory limits</h3>
-                    <table class="data-table">
-                        <tr>
-                            <th>Server</th>
-                            <th>Max RAM</th>
-                            <th>Max CPU</th>
-                            <th>Status</th>
-                        </tr>
-                        <tr>
-                            <td>rust-analyzer</td>
-                            <td>512 MB</td>
-                            <td>50%</td>
-                            <td><span class="badge-ok">enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>gopls</td>
-                            <td>256 MB</td>
-                            <td>50%</td>
-                            <td><span class="badge-ok">enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>typescript-language-server</td>
-                            <td>256 MB</td>
-                            <td>50%</td>
-                            <td><span class="badge-ok">enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>intelephense (PHP)</td>
-                            <td>256 MB</td>
-                            <td>50%</td>
-                            <td><span class="badge-ok">enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>marksman (Markdown)</td>
-                            <td>128 MB</td>
-                            <td>25%</td>
-                            <td><span class="badge-ok">enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>typescript (separate)</td>
-                            <td>&#8212;</td>
-                            <td>&#8212;</td>
-                            <td><span class="badge-off">disabled</span></td>
-                        </tr>
-                    </table>
+                            <h3>What is changed and why</h3>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">Setting</th>
+                                    <th class="data">Value</th>
+                                    <th class="data">Why</th>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>recovery_save_interval</code>
+                                    </td>
+                                    <td class="data">30s</td>
+                                    <td class="data">
+                                        Constant disk I/O every 2s is noticeable
+                                        on slow HDDs
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>auto_save_enabled</code>
+                                    </td>
+                                    <td class="data">false</td>
+                                    <td class="data">
+                                        Recovery saves still protect your work
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code
+                                            >terminal.jump_to_end_on_output</code
+                                        >
+                                    </td>
+                                    <td class="data">false</td>
+                                    <td class="data">
+                                        Prevents forced redraws while scrolling
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <code>horizontal_scrollbar</code>
+                                    </td>
+                                    <td class="data">false</td>
+                                    <td class="data">
+                                        Fewer UI elements to render
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        <span class="warn"
+                                            >LSP process_limits</span
+                                        >
+                                    </td>
+                                    <td class="data">per server</td>
+                                    <td class="data">
+                                        rust-analyzer alone can use 500MB+
+                                        without limits
+                                    </td>
+                                </tr>
+                            </table>
 
-                    <h3>Disable an LSP you don't need</h3>
-                    <pre>{ "lsp": { "rust": { "enabled": false } } }</pre>
+                            <h3>LSP memory limits</h3>
+                            <table class="data" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th class="data">Server</th>
+                                    <th class="data">Max RAM</th>
+                                    <th class="data">Max CPU</th>
+                                    <th class="data">Status</th>
+                                </tr>
+                                <tr>
+                                    <td class="data">rust-analyzer</td>
+                                    <td class="data">512 MB</td>
+                                    <td class="data">50%</td>
+                                    <td class="data">
+                                        <span class="ok">enabled</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">gopls</td>
+                                    <td class="data">256 MB</td>
+                                    <td class="data">50%</td>
+                                    <td class="data">
+                                        <span class="ok">enabled</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">
+                                        typescript-language-server
+                                    </td>
+                                    <td class="data">256 MB</td>
+                                    <td class="data">50%</td>
+                                    <td class="data">
+                                        <span class="ok">enabled</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">intelephense (PHP)</td>
+                                    <td class="data">256 MB</td>
+                                    <td class="data">50%</td>
+                                    <td class="data">
+                                        <span class="ok">enabled</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">marksman (Markdown)</td>
+                                    <td class="data">128 MB</td>
+                                    <td class="data">25%</td>
+                                    <td class="data">
+                                        <span class="ok">enabled</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="data">typescript (separate)</td>
+                                    <td class="data">&mdash;</td>
+                                    <td class="data">&mdash;</td>
+                                    <td class="data">
+                                        <span class="off">disabled</span>
+                                    </td>
+                                </tr>
+                            </table>
 
-                    <h3>Raise memory limit</h3>
-                    <pre>
+                            <h3>Disable an LSP you don't need</h3>
+                            <pre>
+{ "lsp": { "rust": { "enabled": false } } }</pre
+                            >
+
+                            <h3>Raise memory limit</h3>
+                            <pre>
 {
   "lsp": {
     "rust": {
@@ -696,10 +745,10 @@ curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh
     }
   }
 }</pre
-                    >
+                            >
 
-                    <h3>Add Python LSP</h3>
-                    <pre>
+                            <h3>Add Python LSP</h3>
+                            <pre>
 {
   "lsp": {
     "python": {
@@ -708,58 +757,78 @@ curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh
     }
   }
 }</pre
-                    >
-                </div>
+                            >
+                        </td>
+                    </tr>
+                </table>
 
                 <!-- UPDATE -->
-                <div id="pane-update" class="tab-pane">
-                    <h2>&#9658; Update</h2>
-                    <pre>./fresh-install.sh update</pre>
-                    <p>
-                        Checks installed version against latest release. Asks
-                        separately whether to update the binary and the config.
-                    </p>
+                <a name="update"></a>
+                <table class="panel" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="panel-title">UPDATE &amp; REMOVE</td>
+                    </tr>
+                    <tr>
+                        <td class="panel-body">
+                            <h2>&#9658; Update</h2>
+                            <pre>./fresh-install.sh update</pre>
+                            <p>
+                                Checks installed version against latest release.
+                                Asks separately whether to update the binary and
+                                the config.
+                            </p>
 
-                    <h2>&#9658; Remove</h2>
-                    <pre>./fresh-install.sh remove</pre>
-                    <p>
-                        Removes the binary, asks separately about the config,
-                        cleans up metadata. Does
-                        <span class="badge-warn">not</span> touch PATH entries
-                        in your shell config.
-                    </p>
+                            <h2>&#9658; Remove</h2>
+                            <pre>./fresh-install.sh remove</pre>
+                            <p>
+                                Removes the binary, asks separately about the
+                                config, cleans up metadata. Does
+                                <span class="warn">not</span> touch PATH entries
+                                in your shell config.
+                            </p>
 
-                    <h2>&#9658; Metadata location</h2>
-                    <pre>~/.local/share/fresh-installer/install.meta</pre>
-                    <p>
-                        Plain text with three fields: <code>VARIANT</code>,
-                        <code>VERSION</code>, <code>INSTALL_DIR</code>.
-                    </p>
+                            <h2>&#9658; Metadata location</h2>
+                            <pre>
+~/.local/share/fresh-installer/install.meta</pre
+                            >
+                            <p>
+                                Plain text with three fields:
+                                <code>VARIANT</code>, <code>VERSION</code>,
+                                <code>INSTALL_DIR</code>.
+                            </p>
 
-                    <h2>&#9658; Automatic upstream tracking</h2>
-                    <p>
-                        Checks for new
-                        <a
-                            href="https://github.com/sinelaw/fresh"
-                            target="_blank"
-                            >upstream</a
-                        >
-                        releases every night at
-                        <span class="badge-ok">00:00 UTC</span>. Both variants
-                        are built and published automatically. Run
-                        <code>update</code> any time to pull it.
-                    </p>
-                </div>
+                            <h2>&#9658; Automatic upstream tracking</h2>
+                            <p>
+                                Checks for new
+                                <a href="https://github.com/sinelaw/fresh"
+                                    >upstream</a
+                                >
+                                releases every night at
+                                <span class="ok">00:00 UTC</span>. Both variants
+                                are built and published automatically. Run
+                                <code>update</code> any time to pull it.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-            <div id="statusbar">
-                <span class="sb-right">fresh-i686 :: vapenyk</span>
-                <span class="sb-key">F1</span><span class="sb-label">Help</span>
-                <span class="sb-key">F3</span><span class="sb-label">View</span>
-                <span class="sb-key">F5</span><span class="sb-label">Copy</span>
-                <span class="sb-key">F10</span
-                ><span class="sb-label">Menu</span>
-            </div>
+            <!-- STATUS BAR -->
+            <table class="statusbar" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="statusbar-cell">
+                        <span class="sb-key">F1</span
+                        ><span class="sb-label">Help</span>
+                        <span class="sb-key">F3</span
+                        ><span class="sb-label">View</span>
+                        <span class="sb-key">F5</span
+                        ><span class="sb-label">Copy</span>
+                        <span class="sb-key">F10</span
+                        ><span class="sb-label">Menu</span>
+                    </td>
+                    <td class="statusbar-right">fresh-i686 :: vapenyk</td>
+                </tr>
+            </table>
         </div>
     </body>
 </html>
