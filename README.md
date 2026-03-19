@@ -19,6 +19,30 @@ Both binaries are statically linked (musl + zig) and have no external dependenci
 
 ---
 
+## Installer
+
+A POSIX-compatible shell script that handles install, updates and removal for both the binary and the config.
+
+### Download
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh -o fresh-install.sh
+chmod +x fresh-install.sh
+```
+
+### Commands
+
+```sh
+./fresh-install.sh install   # detect CPU variant, download binary + config
+./fresh-install.sh update    # update binary and config to latest
+./fresh-install.sh remove    # remove binary, config, and metadata
+./fresh-install.sh status    # show installed version, variant, config path, PATH check
+```
+
+`install` and `update` ask about the binary and config separately — you can update one without the other. `remove` also asks about the config separately.
+
+---
+
 ## Config
 
 The installer places a `config.json` at `~/.config/fresh/config.json`. The goal is not to strip functionality, but to prevent resource runaway on machines with limited RAM.
@@ -120,30 +144,6 @@ You also need the server installed. Fresh will pick it up automatically for buil
 | Markdown | marksman | Download from [marksman releases](https://github.com/artempyanykh/marksman/releases) |
 | Python | pylsp | `pip install python-lsp-server` |
 | C/C++ | clangd | `apt install clangd` |
-
----
-
-## Installer
-
-A POSIX-compatible shell script that handles install, updates and removal for both the binary and the config.
-
-### Download
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh -o fresh-install.sh
-chmod +x fresh-install.sh
-```
-
-### Commands
-
-```sh
-./fresh-install.sh install   # detect CPU variant, download binary + config
-./fresh-install.sh update    # update binary and config to latest
-./fresh-install.sh remove    # remove binary, config, and metadata
-./fresh-install.sh status    # show installed version, variant, config path, PATH check
-```
-
-`install` and `update` ask about the binary and config separately — you can update one without the other. `remove` also asks about the config separately.
 
 ---
 

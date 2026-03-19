@@ -1,5 +1,5 @@
 #!/bin/sh
-# fresh-install.sh — install/update/remove fresh i686 builds
+# fresh-install.sh — install/update/remove fresh-editor i686 builds
 # POSIX sh compatible
 
 set -e
@@ -152,12 +152,12 @@ remove_config() {
 choose_variant() {
     auto=$(detect_variant)
 
-    printf '\n  Available builds:\n'
-    printf '    1) k8-sse3   — AMD K8 / Sempron with SSE3\n'
-    printf '    2) pentium4  — SSE2 only (broader compatibility)\n'
-    printf '\n'
-    info "Auto-detected: $auto"
-    prompt "Choose variant [1/2] or press Enter to use detected:"
+    printf '\n  Available builds:\n' >&2
+    printf '    1) k8-sse3   — AMD K8 / Sempron with SSE3\n' >&2
+    printf '    2) pentium4  — SSE2 only (broader compatibility)\n' >&2
+    printf '\n' >&2
+    info "Auto-detected: $auto" >&2
+    prompt "Choose variant [1/2] or press Enter to use detected:" >&2
     read -r choice
 
     case "$choice" in
@@ -170,7 +170,7 @@ choose_variant() {
 # ---- choose install dir -----------------------------------------------------
 
 choose_install_dir() {
-    prompt "Install directory [default: $DEFAULT_INSTALL_DIR]:"
+    prompt "Install directory [default: $DEFAULT_INSTALL_DIR]:" >&2
     read -r dir
     if [ -z "$dir" ]; then
         printf '%s' "$DEFAULT_INSTALL_DIR"
