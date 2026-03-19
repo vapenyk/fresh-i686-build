@@ -7,7 +7,10 @@ set -e
 REPO="vapenyk/fresh-i686-build"
 BINARY_NAME="fresh"
 DEFAULT_INSTALL_DIR="$HOME/.local/bin"
+CONFIG_DIR="$HOME/.config/fresh"
+CONFIG_FILE="$CONFIG_DIR/config.json"
 META_FILE="$HOME/.local/share/fresh-installer/install.meta"
+CONFIG_URL="https://raw.githubusercontent.com/$REPO/main/config.json"
 
 # ---- helpers ----------------------------------------------------------------
 
@@ -96,6 +99,54 @@ offer_path() {
     printf '\n    export PATH="%s:$PATH"\n\n' "$install_dir"
 }
 
+# ---- config -----------------------------------------------------------------
+
+install_config() {
+    if [ -f "$CONFIG_FILE" ]; then
+        prompt "Config already exists at $CONFIG_FILE. Overwrite? [y/N]:"
+        read -r ans
+        case "$ans" in [Yy]*) ;; *) info "Keeping existing config."; return ;; esac
+    fi
+
+    mkdir -p "$CONFIG_DIR"
+    tmp=$(mktemp)
+    if download "$CONFIG_URL" "$tmp"; then
+        mv "$tmp" "$CONFIG_FILE"
+        success "Config installed → $CONFIG_FILE"
+    else
+        rm -f "$tmp"
+        warn "Could not download config. Skipping."
+    fi
+}
+
+update_config() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        info "No config found, installing..."
+        install_config
+        return
+    fi
+
+    info "Updating config → $CONFIG_FILE"
+    tmp=$(mktemp)
+    if download "$CONFIG_URL" "$tmp"; then
+        mv "$tmp" "$CONFIG_FILE"
+        success "Config updated → $CONFIG_FILE"
+    else
+        rm -f "$tmp"
+        warn "Could not download config. Keeping existing."
+    fi
+}
+
+remove_config() {
+    if [ -f "$CONFIG_FILE" ]; then
+        prompt "Remove config at $CONFIG_FILE? [y/N]:"
+        read -r ans
+        case "$ans" in [Yy]*) rm -f "$CONFIG_FILE"; success "Config removed." ;; *) info "Config kept." ;; esac
+    else
+        info "No config found, nothing to remove."
+    fi
+}
+
 # ---- choose variant ---------------------------------------------------------
 
 choose_variant() {
@@ -155,6 +206,8 @@ cmd_install() {
 
     meta_save "$variant" "$version" "$install_dir"
     success "Installed fresh $version ($variant) → $install_dir/$BINARY_NAME"
+
+    install_config
     offer_path "$install_dir"
 }
 
@@ -170,21 +223,26 @@ cmd_update() {
 
     if [ "$latest" = "$VERSION" ]; then
         success "Already up to date ($VERSION)."
-        exit 0
+    else
+        info "New version available: $VERSION → $latest"
+        prompt "Update binary? [Y/n]:"
+        read -r ans
+        case "$ans" in [Nn]*) info "Binary update skipped." ;;
+        *)
+            tmp=$(mktemp)
+            download "$(download_url "$latest" "$VARIANT")" "$tmp"
+            chmod +x "$tmp"
+            mv "$tmp" "$INSTALL_DIR/$BINARY_NAME"
+            meta_save "$VARIANT" "$latest" "$INSTALL_DIR"
+            success "Updated fresh $VERSION → $latest ($VARIANT)"
+        ;;
+        esac
     fi
 
-    info "New version available: $VERSION → $latest"
-    prompt "Update now? [Y/n]:"
+    printf '\n'
+    prompt "Update config? [Y/n]:"
     read -r ans
-    case "$ans" in [Nn]*) info "Aborted."; exit 0 ;; esac
-
-    tmp=$(mktemp)
-    download "$(download_url "$latest" "$VARIANT")" "$tmp"
-    chmod +x "$tmp"
-    mv "$tmp" "$INSTALL_DIR/$BINARY_NAME"
-
-    meta_save "$VARIANT" "$latest" "$INSTALL_DIR"
-    success "Updated fresh $VERSION → $latest ($VARIANT)"
+    case "$ans" in [Nn]*) info "Config update skipped." ;; *) update_config ;; esac
 }
 
 cmd_remove() {
@@ -196,7 +254,7 @@ cmd_remove() {
         die "Binary not found at $target"
     fi
 
-    warn "This will remove $target and installation metadata."
+    warn "This will remove $target, config, and installation metadata."
     prompt "Continue? [y/N]:"
     read -r ans
     case "$ans" in [Yy]*) ;; *) info "Aborted."; exit 0 ;; esac
@@ -204,7 +262,8 @@ cmd_remove() {
     rm -f "$target"
     rm -f "$META_FILE"
     success "Removed $target"
-    info "Note: PATH entries in your shell rc file (if any) were not touched."
+
+    remove_config
 }
 
 cmd_status() {
@@ -225,6 +284,12 @@ cmd_status() {
     else
         warn "Metadata exists but binary not found at $target"
     fi
+
+    if [ -f "$CONFIG_FILE" ]; then
+        info "Config  : $CONFIG_FILE"
+    else
+        warn "Config  : not found at $CONFIG_FILE"
+    fi
 }
 
 # ---- usage ------------------------------------------------------------------
@@ -235,9 +300,9 @@ usage() {
 Usage: $(basename "$0") <command>
 
 Commands:
-  install   Download and install fresh
-  update    Update to the latest version
-  remove    Uninstall fresh
+  install   Download and install fresh + low-end config
+  update    Update binary and config to latest
+  remove    Uninstall fresh, config, and metadata
   status    Show installation info and PATH check
 
 EOF
