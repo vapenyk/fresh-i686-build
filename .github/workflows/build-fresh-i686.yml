@@ -51,8 +51,9 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: i686-unknown-linux-musl
+
+      - name: Add i686 musl target
+        run: rustup target add i686-unknown-linux-musl
 
       - name: Install Zig
         uses: mlugg/setup-zig@v1
