@@ -130,7 +130,7 @@ A POSIX-compatible shell script that handles install, updates and removal for bo
 ### Download
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/fresh-i686-build/main/fresh-install.sh -o fresh-install.sh
+curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh -o fresh-install.sh
 chmod +x fresh-install.sh
 ```
 
