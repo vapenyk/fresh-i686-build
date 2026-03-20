@@ -1,3 +1,8 @@
+---
+layout: default
+title: "fresh-editor — i686 builds"
+permalink: /
+---
 # fresh — i686 Optimized Builds
 
 [![CI: Build & Release](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml/badge.svg)](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml)

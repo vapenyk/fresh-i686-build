@@ -17,8 +17,8 @@ plugins:
 # Don't copy these into _site.
 # Note: README.md is the source of truth — the generate-site workflow
 # reads it and writes index.md, which Jekyll then processes normally.
+include: ["README.md"]
 exclude:
-  - README.md
   - fresh-install.sh
   - config.json
   - "*.yml"
