@@ -3,11 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{{ page.title | default: site.title }}</title>
-        <meta
-            name="description"
-            content="{{ page.description | default: site.description }}"
-        />
+        {% seo %}
         <style type="text/css">
             /*
  * NetSurf CSS compatibility audit
@@ -488,12 +484,23 @@
                     }
                 }
 
-                document.onkeypress = function (e) {
-                    var ch = e.charCode || e.keyCode;
-                    if (!ch) {
+                document.onkeydown = function (e) {
+                    var key = e.key
+                        ? e.key.toLowerCase()
+                        : String.fromCharCode(
+                              e.keyCode || e.charCode,
+                          ).toLowerCase();
+                    /* Ignore hotkeys when focus is in a form element */
+                    var tag = document.activeElement
+                        ? document.activeElement.tagName
+                        : "";
+                    if (
+                        tag === "INPUT" ||
+                        tag === "TEXTAREA" ||
+                        tag === "SELECT"
+                    ) {
                         return;
                     }
-                    var key = String.fromCharCode(ch).toLowerCase();
                     var link = hotkeys[key];
                     if (!link) {
                         return;

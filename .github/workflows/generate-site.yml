@@ -1,18 +1,27 @@
-name: Sync README to index.md
+name: CI — Sync docs
+
 on:
   push:
     branches: [main]
     paths:
       - README.md
   workflow_dispatch:
-permissions:
-  contents: write
+
+# Only one sync at a time; a new push cancels the previous run.
+concurrency:
+  group: ci-sync-docs
+  cancel-in-progress: true
+
 jobs:
   sync:
+    name: README → index.md
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Generate index.md from README.md
         run: |

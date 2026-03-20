@@ -5,10 +5,12 @@
 *.sh text eol=lf
 
 # Generated files — excluded from diffs and language stats
-index.html linguist-generated=true linguist-documentation=false
+index.md   linguist-generated=true linguist-documentation=false
 
 # Vendored / config — not counted as code
 config.json linguist-language=JSON
 
 # Documentation
 *.md linguist-documentation=true
+# index.md overrides the *.md rule above (more specific rule wins)
+index.md linguist-documentation=false

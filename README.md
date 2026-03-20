@@ -1,6 +1,6 @@
 # fresh — i686 Optimized Builds
 
-[![Build](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml/badge.svg)](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml)
+[![CI: Build & Release](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml/badge.svg)](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml)
 [![Latest Release](https://img.shields.io/github/v/release/vapenyk/fresh-i686-build)](https://github.com/vapenyk/fresh-i686-build/releases/latest)
 
 Automated builds of [Fresh IDE](https://github.com/sinelaw/fresh) for older 32-bit x86 processors, with a config tuned for low-end hardware.
@@ -71,6 +71,9 @@ Fewer UI elements to render. Vertical scrollbar is kept.
 
 **`whitespace_indicators: false`** (default: off, keeping it off)
 Rendering space/tab characters requires an extra pass per line. Kept off unless you need it.
+
+**`trim_trailing_whitespace_on_save: false`** and **`ensure_final_newline_on_save: false`** (default: off, keeping them off)
+Left disabled to avoid unexpected diff noise on slow machines. If you work with Python or Makefiles regularly, consider enabling both.
 
 **LSP `process_limits`** — the main optimization
 This is the only meaningful memory optimization in the config. Without limits, rust-analyzer alone can consume 500MB–1GB. The limits are set conservatively:
@@ -163,16 +166,16 @@ This repository checks for new upstream releases every night at 00:00 UTC. When 
 ## File Layout
 
 ```
-.github/workflows/build-fresh-i686.yml   — nightly CI: build + release
-.github/workflows/generate-site.yml      — sync README.md → index.md for Jekyll
-.github/workflows/lint.yml               — shellcheck on shell scripts
-_layouts/default.html                    — Jekyll site template
-_data/nav.yml                            — navigation items
-_config.yml                              — Jekyll configuration
-index.md                                 — generated from README.md — do not edit manually
-fresh-install.sh                         — installer script
-config.json                              — low-end editor config
-README.md                                — source of truth for both GitHub and the site
+.github/workflows/build-fresh-i686.yml          — nightly CI: build + release
+.github/workflows/generate-site.yml             — sync README.md → index.md for Jekyll
+.github/workflows/lint-fresh-install-script.yml — shellcheck on shell scripts
+_layouts/default.html                           — Jekyll site template
+_data/nav.yml                                  — navigation items
+_config.yml                                    — Jekyll configuration
+index.md                                       — generated from README.md — do not edit manually
+fresh-install.sh                               — installer script
+config.json                                    — low-end editor config
+README.md                                      — source of truth for both GitHub and the site
 ```
 
 ---

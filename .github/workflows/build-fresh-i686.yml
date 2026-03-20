@@ -1,47 +1,62 @@
-name: Auto-Build Fresh for i686
+name: CI — Build & Release
+
 on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-permissions:
-  contents: write
+
+# Prevent parallel runs: a new nightly cancels a stale one.
+concurrency:
+  group: ci-build-release
+  cancel-in-progress: true
+
 jobs:
+  # ── 1. CHECK ────────────────────────────────────────────────────────────────
   check-upstream:
+    name: Check upstream release
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Read-only: only needs to query the API, not write anything.
+    permissions:
+      contents: read
     outputs:
       upstream_tag: ${{ steps.get_tag.outputs.UPSTREAM_TAG }}
       should_build: ${{ steps.get_tag.outputs.SHOULD_BUILD }}
     steps:
-      - name: Get latest upstream tag
+      - name: Compare upstream tag with our latest release
         id: get_tag
         run: |
           UPSTREAM_TAG=$(curl -sf https://api.github.com/repos/sinelaw/fresh/releases/latest | jq -r .tag_name)
           OUR_LATEST_TAG=$(curl -sf https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name 2>/dev/null || echo "none")
-          echo "Upstream tag: $UPSTREAM_TAG"
-          echo "Our latest tag: $OUR_LATEST_TAG"
+          echo "Upstream tag : $UPSTREAM_TAG"
+          echo "Our latest   : $OUR_LATEST_TAG"
 
           if [ -z "$UPSTREAM_TAG" ] || [ "$UPSTREAM_TAG" = "null" ]; then
             echo "Upstream release not found."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
           elif [ -z "$OUR_LATEST_TAG" ] || [ "$OUR_LATEST_TAG" = "null" ] || [ "$OUR_LATEST_TAG" = "none" ]; then
-            echo "No existing release found — first build."
+            echo "No existing release — first build."
             echo "UPSTREAM_TAG=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
-            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
+            echo "SHOULD_BUILD=true"          >> $GITHUB_OUTPUT
           elif [ "$UPSTREAM_TAG" = "$OUR_LATEST_TAG" ]; then
             echo "Already up to date."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
           else
             echo "New release: $UPSTREAM_TAG (have: $OUR_LATEST_TAG)"
             echo "UPSTREAM_TAG=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
-            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
+            echo "SHOULD_BUILD=true"          >> $GITHUB_OUTPUT
           fi
 
+  # ── 2. BUILD ────────────────────────────────────────────────────────────────
   build:
+    name: Build (${{ matrix.variant }})
     needs: check-upstream
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Read-only during build; only the release job needs write.
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -52,25 +67,26 @@ jobs:
             target_cpu: pentium4
 
     steps:
-      - name: Checkout Upstream Repository
+      - name: Checkout upstream source
         uses: actions/checkout@v4
         with:
           repository: sinelaw/fresh
           ref: ${{ needs.check-upstream.outputs.upstream_tag }}
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust ${{ env.RUST_VERSION }}
+        # Using an exact version for fully reproducible builds.
+        uses: dtolnay/rust-toolchain@1.94.0
+        env:
+          RUST_VERSION: "1.94.0"
 
       - name: Add i686 musl target
         run: rustup target add i686-unknown-linux-musl
 
-      - name: Install Zig
+      - name: Install Zig 0.13.0
         uses: mlugg/setup-zig@v1
         with:
           version: 0.13.0
 
-      # Cache key includes explicit cargo-zigbuild version so stale binaries
-      # are not reused after upstream updates.
       - name: Cache cargo-zigbuild
         id: cache-zigbuild
         uses: actions/cache@v4
@@ -82,9 +98,6 @@ jobs:
         if: steps.cache-zigbuild.outputs.cache-hit != 'true'
         run: cargo install cargo-zigbuild --version "^0.19"
 
-      # Per-variant cache key avoids RUSTFLAGS cross-contamination between
-      # the two builds (each matrix job is fully isolated anyway, but explicit
-      # keys make cache hits correct).
       - name: Cache cargo registry & build artifacts
         uses: actions/cache@v4
         with:
@@ -117,26 +130,31 @@ jobs:
           file fresh-${{ matrix.variant }}
           ls -lh fresh-${{ matrix.variant }}
 
-      - name: Upload artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.variant }}
           path: fresh-${{ matrix.variant }}
 
+  # ── 3. RELEASE ──────────────────────────────────────────────────────────────
   release:
+    name: Publish release
     needs: [check-upstream, build]
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Write access is scoped to this single job only.
+    permissions:
+      contents: write
     steps:
-      - name: Download artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: binary-*
           path: artifacts
           merge-multiple: true
 
-      - name: Verify artifacts present
+      - name: Verify both artifacts are present
         run: |
           test -f artifacts/fresh-k8-sse3  \
             || { echo "::error::fresh-k8-sse3 missing";  exit 1; }
@@ -148,7 +166,7 @@ jobs:
         working-directory: artifacts
         run: sha256sum fresh-k8-sse3 fresh-pentium4 > SHA256SUMS
 
-      - name: Create Release
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.check-upstream.outputs.upstream_tag }}
@@ -162,6 +180,7 @@ jobs:
             | `fresh-pentium4` | Pentium 4 and compatible | SSE2 only |
 
             Statically compiled via `musl` + `zig` with fat LTO.
+            Built with Rust 1.94.0.
 
             **Verify download:**
             ```sh

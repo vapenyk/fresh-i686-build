@@ -1,14 +1,27 @@
-name: Lint
+name: CI — Lint
+
 on:
   push:
     paths: ["**.sh"]
   pull_request:
     paths: ["**.sh"]
+
+# One lint run per branch at a time; new push cancels stale run.
+concurrency:
+  group: ci-lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   shellcheck:
+    name: shellcheck fresh-install.sh
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y shellcheck
-      - run: shellcheck fresh-install.sh
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: shellcheck fresh-install.sh

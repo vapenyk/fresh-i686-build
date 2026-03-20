@@ -127,7 +127,9 @@ latest_version() {
         || { rm -f "$tmp"; die "Could not reach GitHub API."; }
     tag=$(json_field tag_name "$tmp")
     rm -f "$tmp"
-    [ -z "$tag" ] || [ "$tag" = "null" ] && die "Could not parse latest tag from GitHub API."
+    if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+        die "Could not parse latest tag from GitHub API."
+    fi
     printf '%s' "$tag"
 }
 
@@ -401,7 +403,6 @@ EOF
 
 need_cmd grep
 need_cmd awk
-need_cmd sed
 need_cmd mktemp
 need_cmd chmod
 
