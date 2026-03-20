@@ -3,6 +3,8 @@ layout: default
 title: "fresh-editor — i686 builds"
 ---
 
+Automated builds of [Fresh IDE](https://github.com/sinelaw/fresh) for older 32-bit x86 processors, with a config tuned for low-end hardware.
+
 ## Binaries
 
 | File | Target | Requires |
@@ -11,17 +13,14 @@ title: "fresh-editor — i686 builds"
 | `fresh-pentium4` | Pentium 4 and compatible | SSE2 only |
 
 Not sure which one you need? Run:
-
 ```sh
 grep -ow 'pni' /proc/cpuinfo | head -1
 ```
-
 If it prints `pni` — use `fresh-k8-sse3`. Otherwise — `fresh-pentium4`.
 
 Both binaries are statically linked (musl + zig) and have no external dependencies.
 
 Each release includes a `SHA256SUMS` file. Verify after download:
-
 ```sh
 sha256sum -c SHA256SUMS
 ```
@@ -35,8 +34,7 @@ A POSIX-compatible shell script that handles install, updates and removal for bo
 ### Download
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh \
-  -o fresh-install.sh
+curl -fsSL https://raw.githubusercontent.com/vapenyk/fresh-i686-build/main/fresh-install.sh -o fresh-install.sh
 chmod +x fresh-install.sh
 ```
 
@@ -49,70 +47,100 @@ chmod +x fresh-install.sh
 ./fresh-install.sh status    # show installed version, variant, config path, PATH check
 ```
 
-`install` and `update` ask about the binary and config separately. `remove` asks about the config separately. The installer verifies SHA256 checksums after every download.
+`install` and `update` ask about the binary and config separately — you can update one without the other. `remove` also asks about the config separately. The installer verifies SHA256 checksums after every download.
 
 ---
 
 ## Config
 
-The installer places `config.json` at `~/.config/fresh/config.json`. The goal is not to strip functionality but to prevent resource runaway on machines with limited RAM.
+The installer places a `config.json` at `~/.config/fresh/config.json`. The goal is not to strip functionality, but to prevent resource runaway on machines with limited RAM.
 
-### What is changed and why
+### What is actually changed and why
 
-| Setting | Value | Why |
-|---------|-------|-----|
-| `recovery_save_interval` | 30s | Constant disk I/O every 2s is noticeable on slow HDDs |
-| `auto_save_enabled` | false | Recovery saves still protect your work |
-| `terminal.jump_to_end_on_output` | false | Prevents forced redraws while scrolling |
-| `horizontal_scrollbar` | false | Fewer UI elements to render |
-| LSP `process_limits` | per server | rust-analyzer alone can use 500 MB+ without limits |
+**`recovery_save_interval: 30`** (default: 2)
+Fresh saves a crash-recovery snapshot every N seconds. At 2 seconds this causes constant background disk I/O which is very noticeable on slow HDDs. Raised to 30 — your work is still protected on crash, just with a slightly wider window.
 
-### LSP memory limits
+**`auto_save_enabled: false`** (default: off, keeping it off)
+Explicit periodic auto-save is kept disabled. Combined with recovery saves this means you won't lose work, but you control when the file is actually written.
 
-| Server | Max RAM | Max CPU | Status |
-|--------|---------|---------|--------|
-| rust-analyzer | 512 MB | 50% | enabled |
-| gopls | 256 MB | 50% | enabled |
-| typescript-language-server | 256 MB | 50% | enabled |
-| intelephense (PHP) | 256 MB | 50% | enabled |
-| marksman (Markdown) | 128 MB | 25% | enabled |
-| typescript (separate) | 256 MB | 50% | disabled |
+**`terminal.jump_to_end_on_output: false`** (default: true)
+When a terminal in scrollback mode receives new output, Fresh normally forces a redraw and jumps back to the bottom. On slow machines this causes jitter when background processes produce output. Disabled — you scroll back manually when you want.
 
-If a server exceeds the limit Fresh kills and restarts it. You may see a brief pause in diagnostics but the editor stays responsive.
+**`horizontal_scrollbar: false`** (default: off, keeping it off)
+Fewer UI elements to render. Vertical scrollbar is kept.
 
-### Disable an LSP you don't need
+**`whitespace_indicators: false`** (default: off, keeping it off)
+Rendering space/tab characters requires an extra pass per line. Kept off unless you need it.
 
+**LSP `process_limits`** — the main optimization
+This is the only meaningful memory optimization in the config. Without limits, rust-analyzer alone can consume 500MB–1GB. The limits are set conservatively:
+
+| Server | Max RAM | Max CPU |
+|--------|---------|---------|
+| rust (rust-analyzer) | 512 MB | 50% |
+| go (gopls) | 256 MB | 50% |
+| javascript (typescript-language-server) | 256 MB | 50% |
+| markdown (marksman) | 128 MB | 25% |
+| php (intelephense) | 256 MB | 50% |
+| typescript | 256 MB | 50% |
+
+If a server exceeds the limit Fresh kills and restarts it. You may see a brief pause in diagnostics but the editor stays responsive. The `typescript` server is disabled by default — limits are configured so they apply immediately if you enable it.
+
+Everything else — bracket matching, inline diagnostics, line wrap, scrollbars, auto-close, multi-cursor, code folding — is left at defaults. These are editor-side features and cost negligible CPU/RAM.
+
+### Enabling or disabling an LSP server
+
+To turn off a server you don't need, set `"enabled": false`:
 ```json
-{ "lsp": { "rust": { "enabled": false } } }
+"lsp": {
+  "rust": { "enabled": false }
+}
 ```
 
-### Raise memory limit
-
+To turn on typescript (disabled by default in this config):
 ```json
-{
-  "lsp": {
-    "rust": {
-      "enabled": true,
-      "process_limits": { "max_memory_mb": 1024, "max_cpu_percent": 100 }
+"lsp": {
+  "typescript": { "enabled": true }
+}
+```
+
+### Adjusting memory limits
+
+If you have more RAM and want better LSP performance, raise the limit:
+```json
+"lsp": {
+  "rust": {
+    "enabled": true,
+    "process_limits": {
+      "max_memory_mb": 1024,
+      "max_cpu_percent": 100
     }
   }
 }
 ```
 
-### Add Python LSP
+Or remove `process_limits` entirely to let the server use however much it wants.
 
+### Adding an LSP server not in the list
+
+For any language not configured here, add it to the `lsp` section:
 ```json
-{
-  "lsp": {
-    "python": {
-      "command": "pylsp", "args": [], "enabled": true,
-      "process_limits": { "max_memory_mb": 256, "max_cpu_percent": 50 }
+"lsp": {
+  "python": {
+    "command": "pylsp",
+    "args": [],
+    "enabled": true,
+    "process_limits": {
+      "max_memory_mb": 256,
+      "max_cpu_percent": 50
     }
   }
 }
 ```
 
-### LSP server install commands
+You also need the server installed. Fresh will pick it up automatically for built-in languages (Rust, Go, JS/TS, Python, C/C++, Zig, Java, LaTeX, Markdown). For anything else, add a `languages` entry too — see the [Fresh configuration docs](https://github.com/sinelaw/fresh).
+
+### LSP servers install commands
 
 | Language | Server | Install |
 |----------|--------|---------|
@@ -120,7 +148,7 @@ If a server exceeds the limit Fresh kills and restarts it. You may see a brief p
 | Go | gopls | `go install golang.org/x/tools/gopls@latest` |
 | JS/TS | typescript-language-server | `npm install -g typescript-language-server typescript` |
 | PHP | intelephense | `npm install -g intelephense` |
-| Markdown | marksman | [marksman releases](https://github.com/artempyanykh/marksman/releases) |
+| Markdown | marksman | Download from [marksman releases](https://github.com/artempyanykh/marksman/releases) |
 | Python | pylsp | `pip install python-lsp-server` |
 | C/C++ | clangd | `apt install clangd` |
 
@@ -128,7 +156,7 @@ If a server exceeds the limit Fresh kills and restarts it. You may see a brief p
 
 ## Automatic Updates
 
-This repository checks for new upstream releases every night at 00:00 UTC via GitHub Actions. When a new version is published, both variants are built and attached to a release automatically. Run `./fresh-install.sh update` any time to pull the latest.
+This repository checks for new upstream releases every night at 00:00 UTC. When a new version is published, both variants are built and attached to a release automatically. Run `./fresh-install.sh update` any time to pull the latest.
 
 ---
 
@@ -136,14 +164,15 @@ This repository checks for new upstream releases every night at 00:00 UTC via Gi
 
 ```
 .github/workflows/build-fresh-i686.yml   — nightly CI: build + release
+.github/workflows/generate-site.yml      — sync README.md → index.md for Jekyll
 .github/workflows/lint.yml               — shellcheck on shell scripts
 _layouts/default.html                    — Jekyll site template
 _data/nav.yml                            — navigation items
 _config.yml                              — Jekyll configuration
-index.md                                 — site content (this page)
+index.md                                 — generated from README.md — do not edit manually
 fresh-install.sh                         — installer script
 config.json                              — low-end editor config
-README.md                                — GitHub repository overview
+README.md                                — source of truth for both GitHub and the site
 ```
 
 ---
