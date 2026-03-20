@@ -4,367 +4,27 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {% seo %}
-        <style type="text/css">
-            /*
- * NetSurf CSS compatibility audit
- * Reference: netsurf-browser.org/documentation/progress
- *
- * USED — Complete or Nearly done:
- *   background-color                    Complete
- *   border-*                            Complete
- *   color                               Complete
- *   display: block/inline-block         Complete
- *   font-size, font-style, font-weight  Complete
- *   font-family: monospace (generic)    Nearly done
- *   height, width, max-*, min-*         Complete
- *   margin, padding                     Complete
- *   overflow                            Complete
- *   text-align, text-decoration         Complete
- *   vertical-align (table cells)        In progress — safe for td
- *   white-space: pre-wrap               In progress — wrapping works
- *   word-wrap: break-word               LibCSS CSS3 — supported
- *   :hover                              Nearly done
- *   :first-child, :last-child           Supported (LibCSS)
- *   float: right                        Complete
- *   cursor: pointer                     In progress — may show hand
- *
- * AVOIDED — Not started or unreliable:
- *   content: (pseudo-elements)  → inline HTML only
- *   letter-spacing
- *   table-layout
- *   text-shadow
- *   z-index
- *   position: fixed              → not used
- *   position: absolute           → not used (In progress, unreliable)
- *   nth-child(even)              → In progress; .tr-even class via JS is the
- *                                   primary path; nth-child kept as fallback
- *   named font families          → monospace generic only
- *   box-sizing                   → not used (In progress)
- */
 
-            /* HTML5 block elements — explicit display for NetSurf */
-            header,
-            nav,
-            footer,
-            section,
-            article,
-            aside,
-            main {
-                display: block;
-            }
+        <!--
+        Layer 0: NetSurf / IE compatible base styles.
+        Every browser loads this.
+    -->
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="{{ '/assets/css/base.css' | relative_url }}"
+        />
 
-            body {
-                background-color: #000080;
-                color: #aaaaaa;
-                font-family: monospace;
-                font-size: 14px;
-                line-height: 1.5;
-                margin: 0;
-                padding: 16px 0 32px 0;
-            }
-
-            /* ── OUTER WRAPPER ── */
-            #page {
-                width: 800px;
-                margin: 0 auto;
-            }
-
-            /* ── TITLEBAR ── */
-            #titlebar {
-                background-color: #aaaaaa;
-                border-top: 2px solid #ffffff;
-                border-left: 2px solid #ffffff;
-                border-right: 2px solid #555555;
-                border-bottom: 2px solid #555555;
-                padding: 0;
-            }
-            #titlebar table {
-                width: 100%;
-            }
-            .tb-title {
-                font-weight: bold;
-                color: #000000;
-                font-size: 13px;
-                padding: 3px 8px;
-                white-space: nowrap;
-            }
-            .tb-links {
-                text-align: right;
-                padding: 3px 6px;
-                white-space: nowrap;
-            }
-            a.btn {
-                background-color: #aaaaaa;
-                color: #000000;
-                border-top: 1px solid #ffffff;
-                border-left: 1px solid #ffffff;
-                border-right: 1px solid #555555;
-                border-bottom: 1px solid #555555;
-                padding: 1px 8px;
-                margin-left: 6px;
-                font-size: 12px;
-                font-family: monospace;
-                text-decoration: none;
-            }
-            a.btn:hover {
-                background-color: #000080;
-                color: #ffffff;
-            }
-
-            /* ── MENUBAR ── */
-            #menubar {
-                background-color: #aaaaaa;
-                border-left: 2px solid #ffffff;
-                border-right: 2px solid #555555;
-                border-bottom: 1px solid #555555;
-                padding: 2px 4px;
-            }
-            a.mitem {
-                color: #000000;
-                text-decoration: none;
-                padding: 2px 8px 2px 4px;
-                font-size: 13px;
-                font-family: monospace;
-                display: inline-block;
-            }
-            a.mitem:hover {
-                background-color: #000080;
-                color: #ffffff;
-            }
-            /* JS adds this class to highlight the active section */
-            a.mitem-active {
-                background-color: #000060;
-                color: #ffffff;
-            }
-            span.hot {
-                text-decoration: underline;
-            }
-
-            /* ── CHROME ── */
-            #chrome {
-                background-color: #000080;
-                border-left: 2px solid #ffffff;
-                border-right: 2px solid #555555;
-                padding: 12px 16px;
-            }
-
-            /* ── INTRO / HERO
-               The first <p> inside .content-body becomes the intro block.
-               README.md's opening paragraph flows here automatically.
-               :first-child is supported via LibCSS in NetSurf.            ── */
-            .content-body > p:first-child {
-                background-color: #000060;
-                border: 1px solid #55ffff;
-                padding: 10px 14px;
-                margin-bottom: 12px;
-                color: #cccccc;
-                line-height: 1.7;
-            }
-            .content-body > p:first-child a {
-                color: #55ffff;
-            }
-            .content-body > p:first-child a:hover {
-                text-decoration: underline;
-            }
-
-            /* ── CONTENT ── */
-            #content {
-                width: 736px;
-            }
-
-            /* ── TYPOGRAPHY ── */
-            h2 {
-                color: #55ffff;
-                font-size: 14px;
-                font-weight: bold;
-                margin: 20px 0 6px 0;
-                padding: 3px 0 3px 10px;
-                border-left: 3px solid #ffff55;
-            }
-            h2:first-child {
-                margin-top: 0;
-            }
-
-            h3 {
-                color: #ffff55;
-                font-size: 13px;
-                font-weight: bold;
-                margin: 12px 0 4px 0;
-                padding-left: 6px;
-                border-left: 2px solid #555555;
-            }
-
-            p {
-                color: #aaaaaa;
-                margin: 0 0 8px 0;
-                line-height: 1.65;
-            }
-            p:last-child {
-                margin-bottom: 0;
-            }
-
-            a {
-                color: #55ffff;
-                text-decoration: none;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-            strong {
-                color: #ffffff;
-            }
-            em {
-                color: #ffff55;
-                font-style: normal;
-            }
-
-            ul,
-            ol {
-                color: #aaaaaa;
-                margin: 4px 0 10px 18px;
-            }
-            li {
-                margin-bottom: 4px;
-                line-height: 1.6;
-            }
-
-            hr {
-                border: none;
-                border-top: 1px solid #003366;
-                margin: 14px 0;
-            }
-
-            /* ── CODE ──
-               .copy-btn is injected by JS above each <pre>.
-               Without JS, pre renders normally with all four borders.
-               With JS, pre loses its top border (JS sets inline style)
-               and visually merges with the button above it.            ── */
-            .copy-btn {
-                display: block;
-                background-color: #001a00;
-                color: #55aa55;
-                border-top: 1px solid #005500;
-                border-left: 3px solid #005500;
-                border-right: 1px solid #003300;
-                border-bottom: none;
-                padding: 2px 8px;
-                margin: 6px 0 0 0;
-                font-family: monospace;
-                font-size: 11px;
-                cursor: pointer;
-                text-align: right;
-            }
-            .copy-btn:hover {
-                background-color: #002800;
-                color: #55ff55;
-            }
-
-            pre {
-                font-family: monospace;
-                color: #55ff55;
-                background-color: #000030;
-                font-size: 13px;
-                padding: 8px 12px;
-                margin: 6px 0 12px 0;
-                border-top: 1px solid #005500;
-                border-left: 3px solid #005500;
-                border-right: 1px solid #003300;
-                border-bottom: 1px solid #003300;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            }
-            code {
-                font-family: monospace;
-                color: #55ff55;
-                background-color: #000030;
-                font-size: 13px;
-                padding: 1px 4px;
-                border: 1px solid #003300;
-            }
-            pre code {
-                background: none;
-                border: none;
-                padding: 0;
-            }
-
-            /* ── DATA TABLES ── */
-            table {
-                border-collapse: collapse;
-                font-size: 13px;
-                margin: 8px 0 14px 0;
-                width: 100%;
-            }
-            thead th {
-                background-color: #000050;
-                color: #55ffff;
-                padding: 5px 10px;
-                border: 1px solid #005555;
-                text-align: left;
-                font-weight: bold;
-            }
-            tbody td {
-                padding: 4px 10px;
-                border: 1px solid #002244;
-                color: #aaaaaa;
-                vertical-align: top;
-                word-wrap: break-word;
-            }
-            /* Primary: JS adds .tr-even on odd-indexed tbody rows */
-            .tr-even td {
-                background-color: #00003a;
-            }
-            /* Fallback: nth-child for browsers that support it (not NetSurf) */
-            tbody tr:nth-child(even) td {
-                background-color: #00003a;
-            }
-
-            /* ── SECTION PANELS ── */
-            .content-body h2 {
-                border-top: 1px solid #55ffff;
-                padding-top: 10px;
-                margin-top: 14px;
-            }
-            .content-body h2:first-child {
-                border-top: none;
-                padding-top: 0;
-                margin-top: 0;
-            }
-
-            /* ── STATUSBAR ── */
-            #statusbar {
-                background-color: #aaaaaa;
-                border-top: 1px solid #555555;
-                border-left: 2px solid #ffffff;
-                border-right: 2px solid #555555;
-                border-bottom: 2px solid #555555;
-                padding: 0;
-            }
-            #statusbar table {
-                width: 100%;
-            }
-            .sb-l {
-                color: #000000;
-                font-size: 12px;
-                padding: 2px 8px;
-            }
-            .sb-r {
-                color: #555555;
-                font-size: 11px;
-                text-align: right;
-                padding: 2px 8px;
-            }
-            span.key {
-                background-color: #000080;
-                color: #aaaaaa;
-                padding: 0 4px;
-                margin-right: 2px;
-                font-weight: bold;
-            }
-            span.lbl {
-                color: #000000;
-                margin-right: 10px;
-            }
-        </style>
+        <!--
+        Layer 1-3: CSS custom properties, @media, @supports.
+        Old browsers that don't understand these tags skip this file entirely,
+        or ignore individual blocks they don't understand.
+    -->
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="{{ '/assets/css/modern.css' | relative_url }}"
+        />
     </head>
     <body>
         <div id="page">
@@ -392,31 +52,32 @@
             </header>
 
             <!-- MENUBAR
-                 data-hot is read by JS for keyboard shortcuts.
-                 The underlined letter in <span class="hot"> is the visual hint;
-                 data-hot is the machine-readable copy of the same value.      -->
+         data-hot is read by JS for keyboard shortcuts.
+         The underlined letter in <span class="hot"> is the visual hint.  -->
             <nav id="menubar">
-                {% for item in site.data.nav %}{% if item.href %}<a
+                {% for item in site.data.nav %} {% if item.href %}
+                <a
                     class="mitem"
                     href="{{ item.href }}"
                     data-hot="{{ item.hot }}"
                     ><span class="hot">{{ item.hot }}</span>{{ item.label |
                     remove_first: item.hot }}</a
-                >{% else %}<a
-                    class="mitem"
-                    href="#{{ item.id }}"
-                    data-hot="{{ item.hot }}"
+                >
+                {% else %}
+                <a class="mitem" href="#{{ item.id }}" data-hot="{{ item.hot }}"
                     ><span class="hot">{{ item.hot }}</span>{{ item.label |
                     remove_first: item.hot }}</a
-                >{% endif %}{% endfor %}
+                >
+                {% endif %} {% endfor %}
             </nav>
 
             <!-- MAIN CONTENT -->
             <main id="chrome">
                 <div id="content">
-                    <!-- The first <p> in .content-body is styled as the intro
-                         hero block via CSS (.content-body > p:first-child).
-                         README.md's opening paragraph flows there automatically. -->
+                    <!--
+                The first <p> in .content-body is styled as the intro hero block
+                via CSS (.content-body > p:first-child).
+            -->
                     <div class="content-body">{{ content }}</div>
                 </div>
             </main>
@@ -442,218 +103,11 @@
         </div>
 
         <!--
-            JAVASCRIPT — progressive enhancement
-            =====================================
-            The script is at the end of <body> so the DOM is fully parsed
-            before it runs — no DOMContentLoaded needed.
-
-            Duktape (NetSurf) compatibility rules applied throughout:
-              - var only (no let / const)
-              - No arrow functions
-              - No template literals
-              - No classList — className string manipulation only
-              - No querySelector / querySelectorAll
-              - No dataset
-              - navigator.clipboard tried first; execCommand('copy') as fallback
-              - setTimeout wrapped in try/catch (timer support varies)
-              - window.addEventListener used only where window.scroll is needed;
-                guarded with existence check
-
-            The page is fully functional without JS. JS adds:
-              1. Keyboard hotkeys (B I C A F W U) → jump to nav sections
-              2. Copy buttons above every <pre> block
-              3. Table zebra striping via .tr-even class
-                 (replaces nth-child which NetSurf does not implement)
-              4. Active nav item highlight while scrolling
-        -->
-        <script type="text/javascript">
-            (function () {
-                /* ── 1. KEYBOARD HOTKEYS ────────────────────────────────────────
-               Reads data-hot attributes from <a class="mitem"> elements.
-               Pressing the letter jumps to the anchor or follows the href.  */
-                var bar = document.getElementById("menubar");
-                var hotkeys = {};
-
-                if (bar) {
-                    var links = bar.getElementsByTagName("a");
-                    for (var i = 0; i < links.length; i++) {
-                        var hot = links[i].getAttribute("data-hot");
-                        if (hot) {
-                            hotkeys[hot.toLowerCase()] = links[i];
-                        }
-                    }
-                }
-
-                document.onkeydown = function (e) {
-                    var key = e.key
-                        ? e.key.toLowerCase()
-                        : String.fromCharCode(
-                              e.keyCode || e.charCode,
-                          ).toLowerCase();
-                    /* Ignore hotkeys when focus is in a form element */
-                    var tag = document.activeElement
-                        ? document.activeElement.tagName
-                        : "";
-                    if (
-                        tag === "INPUT" ||
-                        tag === "TEXTAREA" ||
-                        tag === "SELECT"
-                    ) {
-                        return;
-                    }
-                    var link = hotkeys[key];
-                    if (!link) {
-                        return;
-                    }
-                    var href = link.getAttribute("href");
-                    if (!href) {
-                        return;
-                    }
-                    if (href.charAt(0) === "#") {
-                        var id = href.substring(1);
-                        var target = document.getElementById(id);
-                        if (target && target.scrollIntoView) {
-                            target.scrollIntoView();
-                        }
-                    } else {
-                        window.location = href;
-                    }
-                };
-
-                /* ── 2. COPY BUTTONS ────────────────────────────────────────────
-               Injects a <button class="copy-btn"> before each <pre>.
-               CSS connects them visually (matching left border, no gap).
-               Clipboard: tries navigator.clipboard, then execCommand.       */
-
-                function copyText(text) {
-                    if (
-                        window.navigator &&
-                        window.navigator.clipboard &&
-                        window.navigator.clipboard.writeText
-                    ) {
-                        try {
-                            window.navigator.clipboard.writeText(text);
-                            return true;
-                        } catch (ignore) {}
-                    }
-                    try {
-                        var ta = document.createElement("textarea");
-                        ta.value = text;
-                        ta.style.position = "absolute";
-                        ta.style.left = "-9999px";
-                        ta.style.top = "0";
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand("copy");
-                        document.body.removeChild(ta);
-                        return true;
-                    } catch (ignore) {}
-                    return false;
-                }
-
-                var pres = document.getElementsByTagName("pre");
-                for (var p = 0; p < pres.length; p++) {
-                    (function (pre) {
-                        var btn = document.createElement("button");
-                        btn.className = "copy-btn";
-                        btn.appendChild(document.createTextNode("copy"));
-
-                        btn.onclick = function () {
-                            var text =
-                                typeof pre.textContent !== "undefined"
-                                    ? pre.textContent
-                                    : pre.innerText;
-                            if (copyText(text)) {
-                                btn.firstChild.nodeValue = "ok!";
-                                try {
-                                    setTimeout(function () {
-                                        if (btn.firstChild) {
-                                            btn.firstChild.nodeValue = "copy";
-                                        }
-                                    }, 1500);
-                                } catch (ignore) {}
-                            }
-                        };
-
-                        pre.parentNode.insertBefore(btn, pre);
-
-                        /* Merge button and pre visually: remove pre's top border
-                       and top margin so they sit flush against the button.   */
-                        pre.style.borderTop = "none";
-                        pre.style.marginTop = "0";
-                    })(pres[p]);
-                }
-
-                /* ── 3. TABLE ZEBRA STRIPING ────────────────────────────────────
-               NetSurf does not implement :nth-child.
-               JS adds .tr-even to every second <tbody> row instead.
-               CSS rule `.tr-even td { background-color: #00003a; }` handles
-               the actual coloring; nth-child in CSS is a non-JS fallback.   */
-
-                var tables = document.getElementsByTagName("table");
-                for (var t = 0; t < tables.length; t++) {
-                    var bodies = tables[t].getElementsByTagName("tbody");
-                    for (var b = 0; b < bodies.length; b++) {
-                        var rows = bodies[b].getElementsByTagName("tr");
-                        for (var r = 0; r < rows.length; r++) {
-                            if (r % 2 === 1) {
-                                var cls = rows[r].className;
-                                rows[r].className = cls
-                                    ? cls + " tr-even"
-                                    : "tr-even";
-                            }
-                        }
-                    }
-                }
-
-                /* ── 4. ACTIVE NAV HIGHLIGHT ON SCROLL ──────────────────────────
-               Highlights the menubar item whose section is currently on
-               screen. Guarded: only runs if window.addEventListener exists.  */
-
-                if (bar && window.addEventListener) {
-                    var content = document.getElementById("content");
-                    var headings = content
-                        ? content.getElementsByTagName("h2")
-                        : [];
-                    var menuLinks = bar.getElementsByTagName("a");
-
-                    function setActiveNav(activeHref) {
-                        for (var m = 0; m < menuLinks.length; m++) {
-                            var href = menuLinks[m].getAttribute("href");
-                            var base = menuLinks[m].className.replace(
-                                /\s*mitem-active/g,
-                                "",
-                            );
-                            menuLinks[m].className =
-                                href === activeHref
-                                    ? base + " mitem-active"
-                                    : base;
-                        }
-                    }
-
-                    window.addEventListener(
-                        "scroll",
-                        function () {
-                            var scrollY =
-                                window.pageYOffset ||
-                                (document.documentElement
-                                    ? document.documentElement.scrollTop
-                                    : 0) ||
-                                document.body.scrollTop ||
-                                0;
-
-                            var active = null;
-                            for (var h = 0; h < headings.length; h++) {
-                                if (headings[h].offsetTop <= scrollY + 100) {
-                                    active = headings[h];
-                                }
-                            }
-                            setActiveNav(active ? "#" + active.id : null);
-                        },
-                        false,
-                    );
-                }
-            })();
-        </script>
+    main.js — progressive enhancement.
+    Loaded at end of body so DOM is ready without needing DOMContentLoaded.
+    Modern JS (ES6+). Old browsers that can't parse it will throw a syntax
+    error and stop — that's fine, the page works without JS.
+-->
+        <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
     </body>
 </html>
