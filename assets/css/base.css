@@ -1,0 +1,264 @@
+/*
+ * base.css — Layer 0
+ * NetSurf / IE compatible. No @media, no @supports, no CSS variables.
+ * Every rule here must work in the oldest browser that could visit this site.
+ *
+ * NetSurf CSS audit: netsurf-browser.org/documentation/progress
+ * Safe:   background-color, border, color, display block/inline-block,
+ *         font-size/style/weight, margin, padding, overflow, text-align,
+ *         text-decoration, white-space: pre-wrap, word-wrap: break-word,
+ *         :hover, :first-child/:last-child, float
+ * Avoid:  content:, letter-spacing, text-shadow, z-index,
+ *         position: fixed/absolute, nth-child (use .tr-even via JS instead),
+ *         named font families (use monospace generic only), box-sizing
+ */
+
+/* ── HTML5 block elements — explicit display for NetSurf ── */
+header, nav, footer, section, article, aside, main { display: block; }
+
+body {
+    background-color: #000080;
+    color: #aaaaaa;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 16px 0 32px 0;
+}
+
+/* ── OUTER WRAPPER ── */
+#page {
+    width: 800px;
+    margin: 0 auto;
+}
+
+/* ── TITLEBAR ── */
+#titlebar {
+    background-color: #aaaaaa;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #555555;
+    border-bottom: 2px solid #555555;
+    padding: 0;
+}
+#titlebar table { width: 100%; }
+.tb-title {
+    font-weight: bold;
+    color: #000000;
+    font-size: 13px;
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+.tb-links {
+    text-align: right;
+    padding: 3px 6px;
+    white-space: nowrap;
+}
+
+a.btn {
+    background-color: #aaaaaa;
+    color: #000000;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #555555;
+    border-bottom: 1px solid #555555;
+    padding: 1px 8px;
+    margin-left: 6px;
+    font-size: 12px;
+    font-family: monospace;
+    text-decoration: none;
+}
+a.btn:hover {
+    background-color: #000080;
+    color: #ffffff;
+}
+
+/* ── MENUBAR ── */
+#menubar {
+    background-color: #aaaaaa;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #555555;
+    border-bottom: 1px solid #555555;
+    padding: 2px 4px;
+}
+a.mitem {
+    color: #000000;
+    text-decoration: none;
+    padding: 2px 8px 2px 4px;
+    font-size: 13px;
+    font-family: monospace;
+    display: inline-block;
+}
+a.mitem:hover {
+    background-color: #000080;
+    color: #ffffff;
+}
+a.mitem-active {
+    background-color: #000060;
+    color: #ffffff;
+}
+span.hot { text-decoration: underline; }
+
+/* ── CHROME ── */
+#chrome {
+    background-color: #000080;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #555555;
+    padding: 12px 16px;
+}
+
+/* ── INTRO HERO ── */
+.content-body > p:first-child {
+    background-color: #000060;
+    border: 1px solid #55ffff;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    color: #cccccc;
+    line-height: 1.7;
+}
+.content-body > p:first-child a { color: #55ffff; }
+.content-body > p:first-child a:hover { text-decoration: underline; }
+
+/* ── CONTENT ── */
+#content { width: 736px; }
+
+/* ── TYPOGRAPHY ── */
+h2 {
+    color: #55ffff;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 20px 0 6px 0;
+    padding: 3px 0 3px 10px;
+    border-left: 3px solid #ffff55;
+}
+h2:first-child { margin-top: 0; }
+
+h3 {
+    color: #ffff55;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 12px 0 4px 0;
+    padding-left: 6px;
+    border-left: 2px solid #555555;
+}
+
+p {
+    color: #aaaaaa;
+    margin: 0 0 8px 0;
+    line-height: 1.65;
+}
+p:last-child { margin-bottom: 0; }
+
+a { color: #55ffff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: #ffffff; }
+em { color: #ffff55; font-style: normal; }
+
+ul, ol { color: #aaaaaa; margin: 4px 0 10px 18px; }
+li { margin-bottom: 4px; line-height: 1.6; }
+
+hr {
+    border: none;
+    border-top: 1px solid #003366;
+    margin: 14px 0;
+}
+
+/* ── CODE ── */
+.copy-btn {
+    display: block;
+    background-color: #001a00;
+    color: #55aa55;
+    border-top: 1px solid #005500;
+    border-left: 3px solid #005500;
+    border-right: 1px solid #003300;
+    border-bottom: none;
+    padding: 2px 8px;
+    margin: 6px 0 0 0;
+    font-family: monospace;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: right;
+}
+.copy-btn:hover { background-color: #002800; color: #55ff55; }
+
+pre {
+    font-family: monospace;
+    color: #55ff55;
+    background-color: #000030;
+    font-size: 13px;
+    padding: 8px 12px;
+    margin: 6px 0 12px 0;
+    border-top: 1px solid #005500;
+    border-left: 3px solid #005500;
+    border-right: 1px solid #003300;
+    border-bottom: 1px solid #003300;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+code {
+    font-family: monospace;
+    color: #55ff55;
+    background-color: #000030;
+    font-size: 13px;
+    padding: 1px 4px;
+    border: 1px solid #003300;
+}
+pre code { background: none; border: none; padding: 0; }
+
+/* ── DATA TABLES ── */
+table {
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0 14px 0;
+    width: 100%;
+}
+thead th {
+    background-color: #000050;
+    color: #55ffff;
+    padding: 5px 10px;
+    border: 1px solid #005555;
+    text-align: left;
+    font-weight: bold;
+}
+tbody td {
+    padding: 4px 10px;
+    border: 1px solid #002244;
+    color: #aaaaaa;
+    vertical-align: top;
+    word-wrap: break-word;
+}
+.tr-even td { background-color: #00003a; }
+tbody tr:nth-child(even) td { background-color: #00003a; }
+
+/* ── SECTION PANELS ── */
+.content-body h2 {
+    border-top: 1px solid #55ffff;
+    padding-top: 10px;
+    margin-top: 14px;
+}
+.content-body h2:first-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* ── STATUSBAR ── */
+#statusbar {
+    background-color: #aaaaaa;
+    border-top: 1px solid #555555;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #555555;
+    border-bottom: 2px solid #555555;
+    padding: 0;
+}
+#statusbar table { width: 100%; }
+.sb-l { color: #000000; font-size: 12px; padding: 2px 8px; }
+.sb-r { color: #555555; font-size: 11px; text-align: right; padding: 2px 8px; }
+span.key {
+    background-color: #000080;
+    color: #aaaaaa;
+    padding: 0 4px;
+    margin-right: 2px;
+    font-weight: bold;
+}
+span.lbl { color: #000000; margin-right: 10px; }

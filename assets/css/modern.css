@@ -1,0 +1,296 @@
+/*
+ * modern.css — Layer 1 + 2 + 3
+ * Browsers that don't understand @media or @supports ignore these blocks entirely.
+ * NetSurf is unaffected. Everything here is additive on top of base.css.
+ *
+ * Layer 1 — CSS custom properties + smooth basics (Chrome 49+, FF 31+)
+ * Layer 2 — @media responsive layout
+ * Layer 3 — @supports progressive enhancement (grid, backdrop-filter, etc.)
+ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LAYER 1 — CSS custom properties + quality-of-life
+   Browsers that don't support :root variables just skip the whole cascade.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --bg: #000080;
+    --bg-dark: #000060;
+    --bg-darker: #000030;
+    --chrome: #aaaaaa;
+    --chrome-mid: #888888;
+    --chrome-dark: #555555;
+    --text: #aaaaaa;
+    --text-bright: #ffffff;
+    --cyan: #55ffff;
+    --yellow: #ffff55;
+    --green: #55ff55;
+    --green-dim: #55aa55;
+    --border-light: #ffffff;
+    --border-dark: #555555;
+    --font-mono:
+        "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", monospace;
+
+    --transition-fast: 120ms ease;
+    --transition-mid: 220ms ease;
+}
+
+body {
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+}
+
+/* Slightly nicer scrollbar on WebKit */
+::-webkit-scrollbar {
+    width: 8px;
+    background: var(--bg-darker);
+}
+::-webkit-scrollbar-thumb {
+    background: #003366;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #005599;
+}
+
+/* Smooth transitions on interactive elements */
+a.btn,
+a.mitem,
+.copy-btn {
+    transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast);
+}
+
+/* Better focus rings for keyboard navigation */
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+/* Smooth section transitions */
+h2,
+h3 {
+    scroll-margin-top: 48px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LAYER 2 — @media responsive layout
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet: 840px and below ── */
+@media (max-width: 840px) {
+    body {
+        padding: 0 0 24px 0;
+        font-size: 13px;
+    }
+
+    #page {
+        width: 100%;
+    }
+
+    #chrome {
+        padding: 10px 12px;
+    }
+
+    #content {
+        width: 100%;
+    }
+
+    /* Let long code lines scroll horizontally instead of wrapping */
+    pre {
+        white-space: pre;
+        overflow-x: auto;
+        font-size: 12px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+    thead th,
+    tbody td {
+        padding: 4px 8px;
+    }
+}
+
+/* ── Mobile: 600px and below ── */
+@media (max-width: 600px) {
+    body {
+        font-size: 12px;
+    }
+
+    #titlebar table,
+    #statusbar table {
+        display: block;
+    }
+    .tb-title,
+    .tb-links,
+    .sb-l,
+    .sb-r {
+        display: block;
+        text-align: left;
+    }
+    .tb-links {
+        padding-top: 0;
+    }
+
+    /* Stack nav items and allow wrapping */
+    #menubar {
+        padding: 4px;
+    }
+    a.mitem {
+        padding: 4px 10px 4px 6px;
+        font-size: 12px;
+    }
+
+    /* Full-width tables scroll horizontally */
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    table {
+        min-width: 400px;
+    }
+
+    h2 {
+        font-size: 13px;
+    }
+    h3 {
+        font-size: 12px;
+    }
+}
+
+/* ── Prefer reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+    body {
+        scroll-behavior: auto;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LAYER 3 — @supports progressive enhancements
+   Only applied in browsers that explicitly support the tested property.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── CRT scanline overlay on the main content area ── */
+@supports (
+    background: repeating-linear-gradient(
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.08) 2px,
+            rgba(0, 0, 0, 0.08) 4px
+        )
+) {
+    #chrome::after {
+        content: "";
+        display: block;
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.06) 2px,
+            rgba(0, 0, 0, 0.06) 4px
+        );
+        z-index: 1;
+    }
+    /* Ensure content sits above the scanline overlay */
+    #content {
+        position: relative;
+        z-index: 2;
+    }
+    #chrome {
+        position: relative;
+    }
+}
+
+/* ── Glowing cyan text on h2 ── */
+@supports (text-shadow: 0 0 8px #55ffff) {
+    h2 {
+        text-shadow: 0 0 8px rgba(85, 255, 255, 0.4);
+    }
+    .content-body > p:first-child {
+        box-shadow:
+            0 0 12px rgba(85, 255, 255, 0.15),
+            inset 0 0 20px rgba(0, 0, 96, 0.5);
+    }
+}
+
+/* ── Glowing code blocks ── */
+@supports (box-shadow: 0 0 8px rgba(0, 255, 0, 0.2)) {
+    pre {
+        box-shadow:
+            0 0 16px rgba(0, 80, 0, 0.3),
+            inset 0 0 24px rgba(0, 0, 48, 0.6);
+    }
+}
+
+/* ── Active nav item: glowing indicator ── */
+@supports (box-shadow: inset 0 0 8px rgba(0, 0, 128, 0.5)) {
+    a.mitem-active {
+        box-shadow: inset 0 0 8px rgba(0, 0, 128, 0.5);
+    }
+}
+
+/* ── Table hover highlight ── */
+@supports (transition: background-color 120ms ease) {
+    tbody tr {
+        transition: background-color var(--transition-fast);
+    }
+    tbody tr:hover td {
+        background-color: #00004a;
+    }
+}
+
+/* ── Backdrop blur for titlebar/statusbar (Chrome 76+, Safari 9+) ── */
+@supports (
+    (-webkit-backdrop-filter: blur(4px)) or (backdrop-filter: blur(4px))
+) {
+    /* Nothing here yet — titlebar is opaque by design.
+       Left as a hook for future experiments. */
+}
+
+/* ── CSS grid for titlebar layout instead of <table> ── */
+@supports (display: grid) {
+    /* Only applied on large screens — keeps table fallback on small/old */
+    @media (min-width: 601px) {
+        #titlebar > table,
+        #statusbar > table {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            width: 100%;
+        }
+        #titlebar > table tr,
+        #statusbar > table tr {
+            display: contents;
+        }
+    }
+}
+
+/* ── Smooth copy button feedback ── */
+@supports (transition: all 120ms ease) {
+    .copy-btn {
+        transition:
+            background-color var(--transition-fast),
+            color var(--transition-fast);
+    }
+    .copy-btn.copied {
+        background-color: #003300;
+        color: var(--green);
+    }
+}
+
+/* ── Selection colour ── */
+::selection {
+    background-color: #003366;
+    color: var(--cyan);
+}
