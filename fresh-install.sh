@@ -151,6 +151,8 @@ offer_path() {
     check_path "$install_dir" && return
 
     warn "$install_dir is not in your PATH."
+    # $PATH must stay literal — it expands in the user's shell, not here
+    # shellcheck disable=SC2016
     printf '\n    export PATH="%s:$PATH"\n\n' "$install_dir"
 
     # Detect shell rc file
@@ -166,6 +168,8 @@ offer_path() {
     read -r ans
     case "$ans" in
         [Yy]*)
+            # $PATH must stay literal — it expands in the user's shell, not here
+            # shellcheck disable=SC2016
             printf '\nexport PATH="%s:$PATH"\n' "$install_dir" >> "$shell_rc"
             success "Added to $shell_rc — run: source $shell_rc"
             ;;

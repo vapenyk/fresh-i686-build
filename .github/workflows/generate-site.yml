@@ -1,35 +1,54 @@
-name: Generate Site from README
+name: Sync README to index.md
 on:
   push:
     branches: [main]
     paths:
       - README.md
-      - scripts/generate-site.py
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  generate:
+  sync:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
+      - name: Generate index.md from README.md
+        run: |
+          python3 - <<'EOF'
+          import re
 
-      - name: Install dependencies
-        run: pip install markdown
+          with open('README.md', 'r') as f:
+              text = f.read()
 
-      - name: Generate index.html
-        run: python3 scripts/generate-site.py README.md > index.html
+          # Drop the H1 title line (GitHub shows it; site has its own titlebar)
+          text = re.sub(r'^# .+\n', '', text, count=1)
+
+          # Drop badge lines — lines of the form [![...](...)...]
+          text = re.sub(r'^\[!\[.*\n', '', text, flags=re.MULTILINE)
+
+          # Strip leading blank lines left behind
+          text = text.lstrip('\n')
+
+          front_matter = (
+              '---\n'
+              'layout: default\n'
+              'title: "fresh-editor \u2014 i686 builds"\n'
+              '---\n\n'
+          )
+
+          with open('index.md', 'w') as f:
+              f.write(front_matter + text)
+
+          print('index.md generated from README.md')
+          EOF
 
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.md
           git diff --cached --quiet \
-            || git commit -m "chore: regenerate index.html from README.md [skip ci]"
+            || git commit -m "chore: sync index.md from README.md [skip ci]"
           git push

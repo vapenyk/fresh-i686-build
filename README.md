@@ -164,13 +164,15 @@ This repository checks for new upstream releases every night at 00:00 UTC. When 
 
 ```
 .github/workflows/build-fresh-i686.yml   — nightly CI: build + release
-.github/workflows/generate-site.yml      — regenerate index.html from README
+.github/workflows/generate-site.yml      — sync README.md → index.md for Jekyll
 .github/workflows/lint.yml               — shellcheck on shell scripts
-scripts/generate-site.py                 — README.md → index.html converter
+_layouts/default.html                    — Jekyll site template
+_data/nav.yml                            — navigation items
+_config.yml                              — Jekyll configuration
+index.md                                 — generated from README.md — do not edit manually
 fresh-install.sh                         — installer script
-config.json                              — low-end user config
-README.md                                — source of truth (generates index.html)
-index.html                               — generated — do not edit manually
+config.json                              — low-end editor config
+README.md                                — source of truth for both GitHub and the site
 ```
 
 ---

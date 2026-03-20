@@ -14,12 +14,13 @@ kramdown:
 plugins:
   - jekyll-seo-tag
 
-# Don't copy these into _site
+# Don't copy these into _site.
+# Note: README.md is the source of truth — the generate-site workflow
+# reads it and writes index.md, which Jekyll then processes normally.
 exclude:
-  - README.md          # kept for GitHub, not the site
+  - README.md
   - fresh-install.sh
   - config.json
-  - scripts/
   - "*.yml"
   - Gemfile
   - Gemfile.lock

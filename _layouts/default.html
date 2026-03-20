@@ -10,37 +10,43 @@
         />
         <style type="text/css">
             /*
- * NetSurf compatibility audit (against netsurf-browser.org/documentation/progress)
+ * NetSurf CSS compatibility audit
+ * Reference: netsurf-browser.org/documentation/progress
  *
  * USED — Complete or Nearly done:
- *   background-color, background-image, background-*   Complete
- *   border-*                                           Complete
- *   color                                              Complete
- *   display                                            Complete
- *   font-size, font-style, font-weight                 Complete
- *   font-family (generic only: monospace, serif)       Nearly done
- *   height, width, max-*, min-*                        Complete
- *   margin, padding                                    Complete
- *   overflow                                           Complete
- *   text-align, text-decoration, text-transform        Complete
- *   vertical-align (table cells)                       In progress — safe for td
- *   white-space: pre-wrap                              In progress — wrapping works
- *   word-wrap: break-word  (LibCSS CSS3)               Supported
- *   :hover pseudo-class                                Nearly done
- *   CSS3 selectors: :first-child, :last-child          Supported (LibCSS)
- *   HTML5 block elements via Hubbub parser             Supported
+ *   background-color                    Complete
+ *   border-*                            Complete
+ *   color                               Complete
+ *   display: block/inline-block         Complete
+ *   font-size, font-style, font-weight  Complete
+ *   font-family: monospace (generic)    Nearly done
+ *   height, width, max-*, min-*         Complete
+ *   margin, padding                     Complete
+ *   overflow                            Complete
+ *   text-align, text-decoration         Complete
+ *   vertical-align (table cells)        In progress — safe for td
+ *   white-space: pre-wrap               In progress — wrapping works
+ *   word-wrap: break-word               LibCSS CSS3 — supported
+ *   :hover                              Nearly done
+ *   :first-child, :last-child           Supported (LibCSS)
+ *   float: right                        Complete
+ *   cursor: pointer                     In progress — may show hand
  *
- * AVOIDED — Not started in NetSurf:
- *   content: (pseudo-elements)  → use inline HTML instead
+ * AVOIDED — Not started or unreliable:
+ *   content: (pseudo-elements)  → inline HTML only
  *   letter-spacing
  *   table-layout
  *   text-shadow
  *   z-index
- *   position: fixed
- *   named font families ("Courier New") → monospace only
+ *   position: fixed              → not used
+ *   position: absolute           → not used (In progress, unreliable)
+ *   nth-child(even)              → In progress; .tr-even class via JS is the
+ *                                   primary path; nth-child kept as fallback
+ *   named font families          → monospace generic only
+ *   box-sizing                   → not used (In progress)
  */
 
-            /* HTML5 elements need explicit block display in NetSurf */
+            /* HTML5 block elements — explicit display for NetSurf */
             header,
             nav,
             footer,
@@ -129,6 +135,11 @@
                 background-color: #000080;
                 color: #ffffff;
             }
+            /* JS adds this class to highlight the active section */
+            a.mitem-active {
+                background-color: #000060;
+                color: #ffffff;
+            }
             span.hot {
                 text-decoration: underline;
             }
@@ -141,23 +152,22 @@
                 padding: 12px 16px;
             }
 
-            /* ── HERO ── */
-            #hero {
+            /* ── INTRO / HERO
+               The first <p> inside .content-body becomes the intro block.
+               README.md's opening paragraph flows here automatically.
+               :first-child is supported via LibCSS in NetSurf.            ── */
+            .content-body > p:first-child {
                 background-color: #000060;
                 border: 1px solid #55ffff;
                 padding: 10px 14px;
                 margin-bottom: 12px;
-                width: 736px; /* 768px content - 2*16px padding */
-            }
-            #hero p {
                 color: #cccccc;
-                margin: 0;
                 line-height: 1.7;
             }
-            #hero a {
+            .content-body > p:first-child a {
                 color: #55ffff;
             }
-            #hero a:hover {
+            .content-body > p:first-child a:hover {
                 text-decoration: underline;
             }
 
@@ -173,7 +183,6 @@
                 font-weight: bold;
                 margin: 20px 0 6px 0;
                 padding: 3px 0 3px 10px;
-                /* border-left replaces content:">> " which is Not started in NetSurf */
                 border-left: 3px solid #ffff55;
             }
             h2:first-child {
@@ -229,7 +238,31 @@
                 margin: 14px 0;
             }
 
-            /* ── CODE ── */
+            /* ── CODE ──
+               .copy-btn is injected by JS above each <pre>.
+               Without JS, pre renders normally with all four borders.
+               With JS, pre loses its top border (JS sets inline style)
+               and visually merges with the button above it.            ── */
+            .copy-btn {
+                display: block;
+                background-color: #001a00;
+                color: #55aa55;
+                border-top: 1px solid #005500;
+                border-left: 3px solid #005500;
+                border-right: 1px solid #003300;
+                border-bottom: none;
+                padding: 2px 8px;
+                margin: 6px 0 0 0;
+                font-family: monospace;
+                font-size: 11px;
+                cursor: pointer;
+                text-align: right;
+            }
+            .copy-btn:hover {
+                background-color: #002800;
+                color: #55ff55;
+            }
+
             pre {
                 font-family: monospace;
                 color: #55ff55;
@@ -237,13 +270,10 @@
                 font-size: 13px;
                 padding: 8px 12px;
                 margin: 6px 0 12px 0;
+                border-top: 1px solid #005500;
                 border-left: 3px solid #005500;
+                border-right: 1px solid #003300;
                 border-bottom: 1px solid #003300;
-                /*
-     * white-space: pre-wrap — "In progress" in NetSurf but basic wrapping works.
-     * word-wrap: break-word — LibCSS CSS3, supported.
-     * Together: long lines wrap instead of overflowing.
-     */
                 white-space: pre-wrap;
                 word-wrap: break-word;
             }
@@ -261,10 +291,7 @@
                 padding: 0;
             }
 
-            /* ── DATA TABLES ──
-   width:100% inside the fixed-width #content div is fully constrained.
-   table-layout is Not started in NetSurf — we do NOT use it.
-   word-wrap:break-word on td prevents cell content from stretching. */
+            /* ── DATA TABLES ── */
             table {
                 border-collapse: collapse;
                 font-size: 13px;
@@ -286,16 +313,17 @@
                 vertical-align: top;
                 word-wrap: break-word;
             }
+            /* Primary: JS adds .tr-even on odd-indexed tbody rows */
+            .tr-even td {
+                background-color: #00003a;
+            }
+            /* Fallback: nth-child for browsers that support it (not NetSurf) */
             tbody tr:nth-child(even) td {
                 background-color: #00003a;
             }
 
-            /* ── SECTION PANELS ──
-   Each H2 + following content is visually grouped.
-   We do this with a top-border on h2 and bottom padding on the section.
-   No JS, no generated markup — pure CSS on kramdown output. */
+            /* ── SECTION PANELS ── */
             .content-body h2 {
-                margin-top: 0;
                 border-top: 1px solid #55ffff;
                 padding-top: 10px;
                 margin-top: 14px;
@@ -367,14 +395,21 @@
                 </table>
             </header>
 
-            <!-- MENUBAR -->
+            <!-- MENUBAR
+                 data-hot is read by JS for keyboard shortcuts.
+                 The underlined letter in <span class="hot"> is the visual hint;
+                 data-hot is the machine-readable copy of the same value.      -->
             <nav id="menubar">
                 {% for item in site.data.nav %}{% if item.href %}<a
                     class="mitem"
                     href="{{ item.href }}"
+                    data-hot="{{ item.hot }}"
                     ><span class="hot">{{ item.hot }}</span>{{ item.label |
                     remove_first: item.hot }}</a
-                >{% else %}<a class="mitem" href="#{{ item.id }}"
+                >{% else %}<a
+                    class="mitem"
+                    href="#{{ item.id }}"
+                    data-hot="{{ item.hot }}"
                     ><span class="hot">{{ item.hot }}</span>{{ item.label |
                     remove_first: item.hot }}</a
                 >{% endif %}{% endfor %}
@@ -382,20 +417,10 @@
 
             <!-- MAIN CONTENT -->
             <main id="chrome">
-                <!-- HERO: short description, no headings -->
-                <div id="hero">
-                    <p>
-                        Automated builds of
-                        <a href="https://github.com/sinelaw/fresh">Fresh IDE</a>
-                        for older 32-bit x86 processors, statically linked via
-                        <strong>musl</strong> + <strong>zig</strong> with no
-                        external dependencies. Built nightly, released
-                        automatically.
-                    </p>
-                </div>
-
-                <!-- PAGE BODY from index.md -->
                 <div id="content">
+                    <!-- The first <p> in .content-body is styled as the intro
+                         hero block via CSS (.content-body > p:first-child).
+                         README.md's opening paragraph flows there automatically. -->
                     <div class="content-body">{{ content }}</div>
                 </div>
             </main>
@@ -419,5 +444,209 @@
                 </table>
             </footer>
         </div>
+
+        <!--
+            JAVASCRIPT — progressive enhancement
+            =====================================
+            The script is at the end of <body> so the DOM is fully parsed
+            before it runs — no DOMContentLoaded needed.
+
+            Duktape (NetSurf) compatibility rules applied throughout:
+              - var only (no let / const)
+              - No arrow functions
+              - No template literals
+              - No classList — className string manipulation only
+              - No querySelector / querySelectorAll
+              - No dataset
+              - navigator.clipboard tried first; execCommand('copy') as fallback
+              - setTimeout wrapped in try/catch (timer support varies)
+              - window.addEventListener used only where window.scroll is needed;
+                guarded with existence check
+
+            The page is fully functional without JS. JS adds:
+              1. Keyboard hotkeys (B I C A F W U) → jump to nav sections
+              2. Copy buttons above every <pre> block
+              3. Table zebra striping via .tr-even class
+                 (replaces nth-child which NetSurf does not implement)
+              4. Active nav item highlight while scrolling
+        -->
+        <script type="text/javascript">
+            (function () {
+                /* ── 1. KEYBOARD HOTKEYS ────────────────────────────────────────
+               Reads data-hot attributes from <a class="mitem"> elements.
+               Pressing the letter jumps to the anchor or follows the href.  */
+                var bar = document.getElementById("menubar");
+                var hotkeys = {};
+
+                if (bar) {
+                    var links = bar.getElementsByTagName("a");
+                    for (var i = 0; i < links.length; i++) {
+                        var hot = links[i].getAttribute("data-hot");
+                        if (hot) {
+                            hotkeys[hot.toLowerCase()] = links[i];
+                        }
+                    }
+                }
+
+                document.onkeypress = function (e) {
+                    var ch = e.charCode || e.keyCode;
+                    if (!ch) {
+                        return;
+                    }
+                    var key = String.fromCharCode(ch).toLowerCase();
+                    var link = hotkeys[key];
+                    if (!link) {
+                        return;
+                    }
+                    var href = link.getAttribute("href");
+                    if (!href) {
+                        return;
+                    }
+                    if (href.charAt(0) === "#") {
+                        var id = href.substring(1);
+                        var target = document.getElementById(id);
+                        if (target && target.scrollIntoView) {
+                            target.scrollIntoView();
+                        }
+                    } else {
+                        window.location = href;
+                    }
+                };
+
+                /* ── 2. COPY BUTTONS ────────────────────────────────────────────
+               Injects a <button class="copy-btn"> before each <pre>.
+               CSS connects them visually (matching left border, no gap).
+               Clipboard: tries navigator.clipboard, then execCommand.       */
+
+                function copyText(text) {
+                    if (
+                        window.navigator &&
+                        window.navigator.clipboard &&
+                        window.navigator.clipboard.writeText
+                    ) {
+                        try {
+                            window.navigator.clipboard.writeText(text);
+                            return true;
+                        } catch (ignore) {}
+                    }
+                    try {
+                        var ta = document.createElement("textarea");
+                        ta.value = text;
+                        ta.style.position = "absolute";
+                        ta.style.left = "-9999px";
+                        ta.style.top = "0";
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(ta);
+                        return true;
+                    } catch (ignore) {}
+                    return false;
+                }
+
+                var pres = document.getElementsByTagName("pre");
+                for (var p = 0; p < pres.length; p++) {
+                    (function (pre) {
+                        var btn = document.createElement("button");
+                        btn.className = "copy-btn";
+                        btn.appendChild(document.createTextNode("copy"));
+
+                        btn.onclick = function () {
+                            var text =
+                                typeof pre.textContent !== "undefined"
+                                    ? pre.textContent
+                                    : pre.innerText;
+                            if (copyText(text)) {
+                                btn.firstChild.nodeValue = "ok!";
+                                try {
+                                    setTimeout(function () {
+                                        if (btn.firstChild) {
+                                            btn.firstChild.nodeValue = "copy";
+                                        }
+                                    }, 1500);
+                                } catch (ignore) {}
+                            }
+                        };
+
+                        pre.parentNode.insertBefore(btn, pre);
+
+                        /* Merge button and pre visually: remove pre's top border
+                       and top margin so they sit flush against the button.   */
+                        pre.style.borderTop = "none";
+                        pre.style.marginTop = "0";
+                    })(pres[p]);
+                }
+
+                /* ── 3. TABLE ZEBRA STRIPING ────────────────────────────────────
+               NetSurf does not implement :nth-child.
+               JS adds .tr-even to every second <tbody> row instead.
+               CSS rule `.tr-even td { background-color: #00003a; }` handles
+               the actual coloring; nth-child in CSS is a non-JS fallback.   */
+
+                var tables = document.getElementsByTagName("table");
+                for (var t = 0; t < tables.length; t++) {
+                    var bodies = tables[t].getElementsByTagName("tbody");
+                    for (var b = 0; b < bodies.length; b++) {
+                        var rows = bodies[b].getElementsByTagName("tr");
+                        for (var r = 0; r < rows.length; r++) {
+                            if (r % 2 === 1) {
+                                var cls = rows[r].className;
+                                rows[r].className = cls
+                                    ? cls + " tr-even"
+                                    : "tr-even";
+                            }
+                        }
+                    }
+                }
+
+                /* ── 4. ACTIVE NAV HIGHLIGHT ON SCROLL ──────────────────────────
+               Highlights the menubar item whose section is currently on
+               screen. Guarded: only runs if window.addEventListener exists.  */
+
+                if (bar && window.addEventListener) {
+                    var content = document.getElementById("content");
+                    var headings = content
+                        ? content.getElementsByTagName("h2")
+                        : [];
+                    var menuLinks = bar.getElementsByTagName("a");
+
+                    function setActiveNav(activeHref) {
+                        for (var m = 0; m < menuLinks.length; m++) {
+                            var href = menuLinks[m].getAttribute("href");
+                            var base = menuLinks[m].className.replace(
+                                /\s*mitem-active/g,
+                                "",
+                            );
+                            menuLinks[m].className =
+                                href === activeHref
+                                    ? base + " mitem-active"
+                                    : base;
+                        }
+                    }
+
+                    window.addEventListener(
+                        "scroll",
+                        function () {
+                            var scrollY =
+                                window.pageYOffset ||
+                                (document.documentElement
+                                    ? document.documentElement.scrollTop
+                                    : 0) ||
+                                document.body.scrollTop ||
+                                0;
+
+                            var active = null;
+                            for (var h = 0; h < headings.length; h++) {
+                                if (headings[h].offsetTop <= scrollY + 100) {
+                                    active = headings[h];
+                                }
+                            }
+                            setActiveNav(active ? "#" + active.id : null);
+                        },
+                        false,
+                    );
+                }
+            })();
+        </script>
     </body>
 </html>
