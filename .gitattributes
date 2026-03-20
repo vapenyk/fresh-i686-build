@@ -1,0 +1,14 @@
+# Line endings
+* text=auto
+
+# Shell scripts — LF always
+*.sh text eol=lf
+
+# Generated files — excluded from diffs and language stats
+index.html linguist-generated=true linguist-documentation=false
+
+# Vendored / config — not counted as code
+config.json linguist-language=JSON
+
+# Documentation
+*.md linguist-documentation=true

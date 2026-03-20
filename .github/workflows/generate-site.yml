@@ -1,0 +1,35 @@
+name: Generate Site from README
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - scripts/generate-site.py
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install markdown
+
+      - name: Generate index.html
+        run: python3 scripts/generate-site.py README.md > index.html
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet \
+            || git commit -m "chore: regenerate index.html from README.md [skip ci]"
+          git push

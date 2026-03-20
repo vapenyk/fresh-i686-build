@@ -1,0 +1,423 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{ page.title | default: site.title }}</title>
+        <meta
+            name="description"
+            content="{{ page.description | default: site.description }}"
+        />
+        <style type="text/css">
+            /*
+ * NetSurf compatibility audit (against netsurf-browser.org/documentation/progress)
+ *
+ * USED — Complete or Nearly done:
+ *   background-color, background-image, background-*   Complete
+ *   border-*                                           Complete
+ *   color                                              Complete
+ *   display                                            Complete
+ *   font-size, font-style, font-weight                 Complete
+ *   font-family (generic only: monospace, serif)       Nearly done
+ *   height, width, max-*, min-*                        Complete
+ *   margin, padding                                    Complete
+ *   overflow                                           Complete
+ *   text-align, text-decoration, text-transform        Complete
+ *   vertical-align (table cells)                       In progress — safe for td
+ *   white-space: pre-wrap                              In progress — wrapping works
+ *   word-wrap: break-word  (LibCSS CSS3)               Supported
+ *   :hover pseudo-class                                Nearly done
+ *   CSS3 selectors: :first-child, :last-child          Supported (LibCSS)
+ *   HTML5 block elements via Hubbub parser             Supported
+ *
+ * AVOIDED — Not started in NetSurf:
+ *   content: (pseudo-elements)  → use inline HTML instead
+ *   letter-spacing
+ *   table-layout
+ *   text-shadow
+ *   z-index
+ *   position: fixed
+ *   named font families ("Courier New") → monospace only
+ */
+
+            /* HTML5 elements need explicit block display in NetSurf */
+            header,
+            nav,
+            footer,
+            section,
+            article,
+            aside,
+            main {
+                display: block;
+            }
+
+            body {
+                background-color: #000080;
+                color: #aaaaaa;
+                font-family: monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                margin: 0;
+                padding: 16px 0 32px 0;
+            }
+
+            /* ── OUTER WRAPPER ── */
+            #page {
+                width: 800px;
+                margin: 0 auto;
+            }
+
+            /* ── TITLEBAR ── */
+            #titlebar {
+                background-color: #aaaaaa;
+                border-top: 2px solid #ffffff;
+                border-left: 2px solid #ffffff;
+                border-right: 2px solid #555555;
+                border-bottom: 2px solid #555555;
+                padding: 0;
+            }
+            #titlebar table {
+                width: 100%;
+            }
+            .tb-title {
+                font-weight: bold;
+                color: #000000;
+                font-size: 13px;
+                padding: 3px 8px;
+                white-space: nowrap;
+            }
+            .tb-links {
+                text-align: right;
+                padding: 3px 6px;
+                white-space: nowrap;
+            }
+            a.btn {
+                background-color: #aaaaaa;
+                color: #000000;
+                border-top: 1px solid #ffffff;
+                border-left: 1px solid #ffffff;
+                border-right: 1px solid #555555;
+                border-bottom: 1px solid #555555;
+                padding: 1px 8px;
+                margin-left: 6px;
+                font-size: 12px;
+                font-family: monospace;
+                text-decoration: none;
+            }
+            a.btn:hover {
+                background-color: #000080;
+                color: #ffffff;
+            }
+
+            /* ── MENUBAR ── */
+            #menubar {
+                background-color: #aaaaaa;
+                border-left: 2px solid #ffffff;
+                border-right: 2px solid #555555;
+                border-bottom: 1px solid #555555;
+                padding: 2px 4px;
+            }
+            a.mitem {
+                color: #000000;
+                text-decoration: none;
+                padding: 2px 8px 2px 4px;
+                font-size: 13px;
+                font-family: monospace;
+                display: inline-block;
+            }
+            a.mitem:hover {
+                background-color: #000080;
+                color: #ffffff;
+            }
+            span.hot {
+                text-decoration: underline;
+            }
+
+            /* ── CHROME ── */
+            #chrome {
+                background-color: #000080;
+                border-left: 2px solid #ffffff;
+                border-right: 2px solid #555555;
+                padding: 12px 16px;
+            }
+
+            /* ── HERO ── */
+            #hero {
+                background-color: #000060;
+                border: 1px solid #55ffff;
+                padding: 10px 14px;
+                margin-bottom: 12px;
+                width: 736px; /* 768px content - 2*16px padding */
+            }
+            #hero p {
+                color: #cccccc;
+                margin: 0;
+                line-height: 1.7;
+            }
+            #hero a {
+                color: #55ffff;
+            }
+            #hero a:hover {
+                text-decoration: underline;
+            }
+
+            /* ── CONTENT ── */
+            #content {
+                width: 736px;
+            }
+
+            /* ── TYPOGRAPHY ── */
+            h2 {
+                color: #55ffff;
+                font-size: 14px;
+                font-weight: bold;
+                margin: 20px 0 6px 0;
+                padding: 3px 0 3px 10px;
+                /* border-left replaces content:">> " which is Not started in NetSurf */
+                border-left: 3px solid #ffff55;
+            }
+            h2:first-child {
+                margin-top: 0;
+            }
+
+            h3 {
+                color: #ffff55;
+                font-size: 13px;
+                font-weight: bold;
+                margin: 12px 0 4px 0;
+                padding-left: 6px;
+                border-left: 2px solid #555555;
+            }
+
+            p {
+                color: #aaaaaa;
+                margin: 0 0 8px 0;
+                line-height: 1.65;
+            }
+            p:last-child {
+                margin-bottom: 0;
+            }
+
+            a {
+                color: #55ffff;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            strong {
+                color: #ffffff;
+            }
+            em {
+                color: #ffff55;
+                font-style: normal;
+            }
+
+            ul,
+            ol {
+                color: #aaaaaa;
+                margin: 4px 0 10px 18px;
+            }
+            li {
+                margin-bottom: 4px;
+                line-height: 1.6;
+            }
+
+            hr {
+                border: none;
+                border-top: 1px solid #003366;
+                margin: 14px 0;
+            }
+
+            /* ── CODE ── */
+            pre {
+                font-family: monospace;
+                color: #55ff55;
+                background-color: #000030;
+                font-size: 13px;
+                padding: 8px 12px;
+                margin: 6px 0 12px 0;
+                border-left: 3px solid #005500;
+                border-bottom: 1px solid #003300;
+                /*
+     * white-space: pre-wrap — "In progress" in NetSurf but basic wrapping works.
+     * word-wrap: break-word — LibCSS CSS3, supported.
+     * Together: long lines wrap instead of overflowing.
+     */
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+            code {
+                font-family: monospace;
+                color: #55ff55;
+                background-color: #000030;
+                font-size: 13px;
+                padding: 1px 4px;
+                border: 1px solid #003300;
+            }
+            pre code {
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            /* ── DATA TABLES ──
+   width:100% inside the fixed-width #content div is fully constrained.
+   table-layout is Not started in NetSurf — we do NOT use it.
+   word-wrap:break-word on td prevents cell content from stretching. */
+            table {
+                border-collapse: collapse;
+                font-size: 13px;
+                margin: 8px 0 14px 0;
+                width: 100%;
+            }
+            thead th {
+                background-color: #000050;
+                color: #55ffff;
+                padding: 5px 10px;
+                border: 1px solid #005555;
+                text-align: left;
+                font-weight: bold;
+            }
+            tbody td {
+                padding: 4px 10px;
+                border: 1px solid #002244;
+                color: #aaaaaa;
+                vertical-align: top;
+                word-wrap: break-word;
+            }
+            tbody tr:nth-child(even) td {
+                background-color: #00003a;
+            }
+
+            /* ── SECTION PANELS ──
+   Each H2 + following content is visually grouped.
+   We do this with a top-border on h2 and bottom padding on the section.
+   No JS, no generated markup — pure CSS on kramdown output. */
+            .content-body h2 {
+                margin-top: 0;
+                border-top: 1px solid #55ffff;
+                padding-top: 10px;
+                margin-top: 14px;
+            }
+            .content-body h2:first-child {
+                border-top: none;
+                padding-top: 0;
+                margin-top: 0;
+            }
+
+            /* ── STATUSBAR ── */
+            #statusbar {
+                background-color: #aaaaaa;
+                border-top: 1px solid #555555;
+                border-left: 2px solid #ffffff;
+                border-right: 2px solid #555555;
+                border-bottom: 2px solid #555555;
+                padding: 0;
+            }
+            #statusbar table {
+                width: 100%;
+            }
+            .sb-l {
+                color: #000000;
+                font-size: 12px;
+                padding: 2px 8px;
+            }
+            .sb-r {
+                color: #555555;
+                font-size: 11px;
+                text-align: right;
+                padding: 2px 8px;
+            }
+            span.key {
+                background-color: #000080;
+                color: #aaaaaa;
+                padding: 0 4px;
+                margin-right: 2px;
+                font-weight: bold;
+            }
+            span.lbl {
+                color: #000000;
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="page">
+            <!-- TITLEBAR -->
+            <header id="titlebar">
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="tb-title">
+                            &#9632;&nbsp;fresh-editor &mdash; i686 builds
+                        </td>
+                        <td class="tb-links">
+                            <a
+                                class="btn"
+                                href="https://github.com/vapenyk/fresh-i686-build"
+                                >[ source ]</a
+                            >
+                            <a
+                                class="btn"
+                                href="https://github.com/vapenyk/fresh-i686-build/releases/latest"
+                                >[ latest release ]</a
+                            >
+                        </td>
+                    </tr>
+                </table>
+            </header>
+
+            <!-- MENUBAR -->
+            <nav id="menubar">
+                {% for item in site.data.nav %}{% if item.href %}<a
+                    class="mitem"
+                    href="{{ item.href }}"
+                    ><span class="hot">{{ item.hot }}</span>{{ item.label |
+                    remove_first: item.hot }}</a
+                >{% else %}<a class="mitem" href="#{{ item.id }}"
+                    ><span class="hot">{{ item.hot }}</span>{{ item.label |
+                    remove_first: item.hot }}</a
+                >{% endif %}{% endfor %}
+            </nav>
+
+            <!-- MAIN CONTENT -->
+            <main id="chrome">
+                <!-- HERO: short description, no headings -->
+                <div id="hero">
+                    <p>
+                        Automated builds of
+                        <a href="https://github.com/sinelaw/fresh">Fresh IDE</a>
+                        for older 32-bit x86 processors, statically linked via
+                        <strong>musl</strong> + <strong>zig</strong> with no
+                        external dependencies. Built nightly, released
+                        automatically.
+                    </p>
+                </div>
+
+                <!-- PAGE BODY from index.md -->
+                <div id="content">
+                    <div class="content-body">{{ content }}</div>
+                </div>
+            </main>
+
+            <!-- STATUSBAR -->
+            <footer id="statusbar">
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="sb-l">
+                            <span class="key">F1</span
+                            ><span class="lbl">Help</span>
+                            <span class="key">F3</span
+                            ><span class="lbl">View</span>
+                            <span class="key">F5</span
+                            ><span class="lbl">Copy</span>
+                            <span class="key">F10</span
+                            ><span class="lbl">Menu</span>
+                        </td>
+                        <td class="sb-r">fresh-i686 :: vapenyk</td>
+                    </tr>
+                </table>
+            </footer>
+        </div>
+    </body>
+</html>

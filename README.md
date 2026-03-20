@@ -1,12 +1,15 @@
 # fresh — i686 Optimized Builds
 
+[![Build](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml/badge.svg)](https://github.com/vapenyk/fresh-i686-build/actions/workflows/build-fresh-i686.yml)
+[![Latest Release](https://img.shields.io/github/v/release/vapenyk/fresh-i686-build)](https://github.com/vapenyk/fresh-i686-build/releases/latest)
+
 Automated builds of [Fresh IDE](https://github.com/sinelaw/fresh) for older 32-bit x86 processors, with a config tuned for low-end hardware.
 
 ## Binaries
 
 | File | Target | Requires |
 |------|--------|----------|
-| `fresh-k8-sse3` | AMD K8 / Sempron (Socket 754/939) | SSE3 (pni) |
+| `fresh-k8-sse3` | AMD K8 / Sempron (Socket 754/939) | SSE3 (`pni`) |
 | `fresh-pentium4` | Pentium 4 and compatible | SSE2 only |
 
 Not sure which one you need? Run:
@@ -16,6 +19,11 @@ grep -ow 'pni' /proc/cpuinfo | head -1
 If it prints `pni` — use `fresh-k8-sse3`. Otherwise — `fresh-pentium4`.
 
 Both binaries are statically linked (musl + zig) and have no external dependencies.
+
+Each release includes a `SHA256SUMS` file. Verify after download:
+```sh
+sha256sum -c SHA256SUMS
+```
 
 ---
 
@@ -39,7 +47,7 @@ chmod +x fresh-install.sh
 ./fresh-install.sh status    # show installed version, variant, config path, PATH check
 ```
 
-`install` and `update` ask about the binary and config separately — you can update one without the other. `remove` also asks about the config separately.
+`install` and `update` ask about the binary and config separately — you can update one without the other. `remove` also asks about the config separately. The installer verifies SHA256 checksums after every download.
 
 ---
 
@@ -49,22 +57,22 @@ The installer places a `config.json` at `~/.config/fresh/config.json`. The goal 
 
 ### What is actually changed and why
 
-**`recovery_save_interval: 30`** (default: 2)  
+**`recovery_save_interval: 30`** (default: 2)
 Fresh saves a crash-recovery snapshot every N seconds. At 2 seconds this causes constant background disk I/O which is very noticeable on slow HDDs. Raised to 30 — your work is still protected on crash, just with a slightly wider window.
 
-**`auto_save_enabled: false`** (default: off, keeping it off)  
+**`auto_save_enabled: false`** (default: off, keeping it off)
 Explicit periodic auto-save is kept disabled. Combined with recovery saves this means you won't lose work, but you control when the file is actually written.
 
-**`terminal.jump_to_end_on_output: false`** (default: true)  
+**`terminal.jump_to_end_on_output: false`** (default: true)
 When a terminal in scrollback mode receives new output, Fresh normally forces a redraw and jumps back to the bottom. On slow machines this causes jitter when background processes produce output. Disabled — you scroll back manually when you want.
 
-**`horizontal_scrollbar: false`** (default: off, keeping it off)  
+**`horizontal_scrollbar: false`** (default: off, keeping it off)
 Fewer UI elements to render. Vertical scrollbar is kept.
 
-**`whitespace_indicators: false`** (default: off, keeping it off)  
+**`whitespace_indicators: false`** (default: off, keeping it off)
 Rendering space/tab characters requires an extra pass per line. Kept off unless you need it.
 
-**LSP `process_limits`** — the main optimization  
+**LSP `process_limits`** — the main optimization
 This is the only meaningful memory optimization in the config. Without limits, rust-analyzer alone can consume 500MB–1GB. The limits are set conservatively:
 
 | Server | Max RAM | Max CPU |
@@ -74,12 +82,11 @@ This is the only meaningful memory optimization in the config. Without limits, r
 | javascript (typescript-language-server) | 256 MB | 50% |
 | markdown (marksman) | 128 MB | 25% |
 | php (intelephense) | 256 MB | 50% |
+| typescript | 256 MB | 50% |
 
-If a server exceeds the limit Fresh kills and restarts it. You may see a brief pause in diagnostics but the editor stays responsive.
+If a server exceeds the limit Fresh kills and restarts it. You may see a brief pause in diagnostics but the editor stays responsive. The `typescript` server is disabled by default — limits are configured so they apply immediately if you enable it.
 
 Everything else — bracket matching, inline diagnostics, line wrap, scrollbars, auto-close, multi-cursor, code folding — is left at defaults. These are editor-side features and cost negligible CPU/RAM.
-
----
 
 ### Enabling or disabling an LSP server
 
@@ -149,17 +156,21 @@ You also need the server installed. Fresh will pick it up automatically for buil
 
 ## Automatic Updates
 
-This repository checks for new upstream releases every night at 00:00 UTC. When a new version is published, both variants are built and attached to a release automatically.
+This repository checks for new upstream releases every night at 00:00 UTC. When a new version is published, both variants are built and attached to a release automatically. Run `./fresh-install.sh update` any time to pull the latest.
 
 ---
 
-## File Layout in This Repository
+## File Layout
 
 ```
-.github/workflows/build-fresh-i686.yml   — nightly CI workflow
-fresh-install.sh                          — installer script
-config.json                               — low-end user config
-README.md
+.github/workflows/build-fresh-i686.yml   — nightly CI: build + release
+.github/workflows/generate-site.yml      — regenerate index.html from README
+.github/workflows/lint.yml               — shellcheck on shell scripts
+scripts/generate-site.py                 — README.md → index.html converter
+fresh-install.sh                         — installer script
+config.json                              — low-end user config
+README.md                                — source of truth (generates index.html)
+index.html                               — generated — do not edit manually
 ```
 
 ---

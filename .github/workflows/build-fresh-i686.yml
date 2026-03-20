@@ -8,6 +8,7 @@ permissions:
 jobs:
   check-upstream:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       upstream_tag: ${{ steps.get_tag.outputs.UPSTREAM_TAG }}
       should_build: ${{ steps.get_tag.outputs.SHOULD_BUILD }}
@@ -15,26 +16,41 @@ jobs:
       - name: Get latest upstream tag
         id: get_tag
         run: |
-          UPSTREAM_TAG=$(curl -s https://api.github.com/repos/sinelaw/fresh/releases/latest | jq -r .tag_name)
-          OUR_LATEST_TAG=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+          UPSTREAM_TAG=$(curl -sf https://api.github.com/repos/sinelaw/fresh/releases/latest | jq -r .tag_name)
+          OUR_LATEST_TAG=$(curl -sf https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name 2>/dev/null || echo "none")
           echo "Upstream tag: $UPSTREAM_TAG"
           echo "Our latest tag: $OUR_LATEST_TAG"
+
           if [ -z "$UPSTREAM_TAG" ] || [ "$UPSTREAM_TAG" = "null" ]; then
             echo "Upstream release not found."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
-          elif [ "$UPSTREAM_TAG" != "$OUR_LATEST_TAG" ]; then
-            echo "New release found! Proceeding with build."
+          elif [ -z "$OUR_LATEST_TAG" ] || [ "$OUR_LATEST_TAG" = "null" ] || [ "$OUR_LATEST_TAG" = "none" ]; then
+            echo "No existing release found — first build."
             echo "UPSTREAM_TAG=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
             echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
-          else
+          elif [ "$UPSTREAM_TAG" = "$OUR_LATEST_TAG" ]; then
             echo "Already up to date."
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
+          else
+            echo "New release: $UPSTREAM_TAG (have: $OUR_LATEST_TAG)"
+            echo "UPSTREAM_TAG=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
+            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
           fi
 
   build:
     needs: check-upstream
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: k8-sse3
+            target_cpu: k8-sse3
+          - variant: pentium4
+            target_cpu: pentium4
+
     steps:
       - name: Checkout Upstream Repository
         uses: actions/checkout@v4
@@ -53,64 +69,84 @@ jobs:
         with:
           version: 0.13.0
 
+      # Cache key includes explicit cargo-zigbuild version so stale binaries
+      # are not reused after upstream updates.
       - name: Cache cargo-zigbuild
         id: cache-zigbuild
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-zigbuild
-          key: cargo-zigbuild-${{ runner.os }}
+          key: cargo-zigbuild-0.19-${{ runner.os }}
 
       - name: Install cargo-zigbuild
         if: steps.cache-zigbuild.outputs.cache-hit != 'true'
-        run: cargo install cargo-zigbuild
+        run: cargo install cargo-zigbuild --version "^0.19"
 
-      - name: Cache cargo registry & build
+      # Per-variant cache key avoids RUSTFLAGS cross-contamination between
+      # the two builds (each matrix job is fully isolated anyway, but explicit
+      # keys make cache hits correct).
+      - name: Cache cargo registry & build artifacts
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: cargo-${{ runner.os }}-i686-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-${{ runner.os }}-i686-${{ matrix.variant }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            cargo-${{ runner.os }}-i686-
+            cargo-${{ runner.os }}-i686-${{ matrix.variant }}-
 
-      - name: Build fresh-k8-sse3
+      - name: Build fresh-${{ matrix.variant }}
         env:
           CARGO_PROFILE_RELEASE_LTO: "fat"
           CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "1"
-          RUSTFLAGS: "-C target-cpu=k8-sse3 -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
+          RUSTFLAGS: >-
+            -C target-cpu=${{ matrix.target_cpu }}
+            -C embed-bitcode=yes
+            -C panic=abort
+            -C llvm-args=-align-all-functions=4
+            -C link-arg=-s
         run: |
           cargo zigbuild --target i686-unknown-linux-musl --release
-          mv target/i686-unknown-linux-musl/release/fresh fresh-k8-sse3
+          mv target/i686-unknown-linux-musl/release/fresh fresh-${{ matrix.variant }}
 
-      - name: Build fresh-pentium4
-        env:
-          CARGO_PROFILE_RELEASE_LTO: "fat"
-          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "1"
-          RUSTFLAGS: "-C target-cpu=pentium4 -C embed-bitcode=yes -C panic=abort -C llvm-args=-align-all-functions=4 -C link-arg=-s"
+      - name: Verify binary
         run: |
-          cargo zigbuild --target i686-unknown-linux-musl --release
-          mv target/i686-unknown-linux-musl/release/fresh fresh-pentium4
+          test -f fresh-${{ matrix.variant }} \
+            || { echo "::error::Binary fresh-${{ matrix.variant }} not found"; exit 1; }
+          file fresh-${{ matrix.variant }}
+          ls -lh fresh-${{ matrix.variant }}
 
-      - name: Upload Artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binaries
-          path: |
-            fresh-k8-sse3
-            fresh-pentium4
+          name: binary-${{ matrix.variant }}
+          path: fresh-${{ matrix.variant }}
 
   release:
     needs: [check-upstream, build]
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Download Artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries
+          pattern: binary-*
           path: artifacts
+          merge-multiple: true
+
+      - name: Verify artifacts present
+        run: |
+          test -f artifacts/fresh-k8-sse3  \
+            || { echo "::error::fresh-k8-sse3 missing";  exit 1; }
+          test -f artifacts/fresh-pentium4 \
+            || { echo "::error::fresh-pentium4 missing"; exit 1; }
+          ls -lh artifacts/
+
+      - name: Generate SHA256 checksums
+        working-directory: artifacts
+        run: sha256sum fresh-k8-sse3 fresh-pentium4 > SHA256SUMS
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -119,9 +155,19 @@ jobs:
           name: Fresh IDE ${{ needs.check-upstream.outputs.upstream_tag }} (i686 Optimized)
           body: |
             Automated build of Fresh IDE for older 32-bit processors (i686).
-            - **fresh-k8-sse3**: Optimized for AMD K8 / Sempron with SSE3 support.
-            - **fresh-pentium4**: Compatible with any CPU supporting SSE2 (Pentium 4 and up).
+
+            | Binary | Target | Requires |
+            |--------|--------|----------|
+            | `fresh-k8-sse3` | AMD K8 / Sempron (Socket 754/939) | SSE3 (`pni`) |
+            | `fresh-pentium4` | Pentium 4 and compatible | SSE2 only |
+
             Statically compiled via `musl` + `zig` with fat LTO.
+
+            **Verify download:**
+            ```sh
+            sha256sum -c SHA256SUMS
+            ```
           files: |
             artifacts/fresh-k8-sse3
             artifacts/fresh-pentium4
+            artifacts/SHA256SUMS

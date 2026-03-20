@@ -20,7 +20,6 @@
     "ensure_final_newline_on_save": false,
 
     "auto_save_enabled": false,
-    "auto_save_interval": 60,
     "recovery_save_interval": 30
   },
 
@@ -51,7 +50,11 @@
       }
     },
     "typescript": {
-      "enabled": false
+      "enabled": false,
+      "process_limits": {
+        "max_memory_mb": 256,
+        "max_cpu_percent": 50
+      }
     },
     "markdown": {
       "command": "marksman",
